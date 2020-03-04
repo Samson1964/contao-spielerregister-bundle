@@ -31,7 +31,7 @@ class PlayerDetail extends \Module
 	var $playerid; // Nimmt die ID des abgefragten Spielers auf
 	var $playersearch; // Hier wird der Suchbegriff gespeichert
 	var $minImportance = 1; // Minimale Relevanz
-	
+
 	/**
 	 * Display a wildcard in the back end
 	 * @return string
@@ -55,7 +55,7 @@ class PlayerDetail extends \Module
 			$this->playerid = \Input::get('player');
 			$this->playersearch = strtolower(\Input::get('psearch'));
 		}
-		
+
 		return parent::generate(); // Weitermachen mit dem Modul
 	}
 
@@ -69,17 +69,17 @@ class PlayerDetail extends \Module
 
 		// Weiterleitungsseite ermitteln
 		$jumpTo = \PageModel::findByPk($this->spielerregister_jumpTo);
-		
+
 		$objRegister = $this->Database->prepare('SELECT * FROM tl_spielerregister WHERE active = 1 AND importance >= ? AND id = ?')
-									  ->limit(1)
+		                              ->limit(1)
 		                              ->execute($this->minImportance, $this->playerid);
 
 		// Template-Objekt anlegen
 		$this->Template = new \FrontendTemplate('spielerregister_playerdetail');
 
 		// Link zur aktuellen Seite (inkl. Parameter) für Suchformular zuweisen
-		$this->Template->action = ampersand(\Environment::get('indexFreeRequest')); 
-		
+		$this->Template->action = ampersand(\Environment::get('indexFreeRequest'));
+
 		// Suche auswerten
 		if($this->playersearch)
 		{
@@ -90,7 +90,7 @@ class PlayerDetail extends \Module
 			{
 				// Sucht nach Suchbegriff über alle 4 Nachnamenfelder
 				$objSuche = $this->Database->prepare('SELECT * FROM tl_spielerregister WHERE active = 1 AND importance >= ? AND (surname1 LIKE ? OR surname2 LIKE ? OR surname3 LIKE ? OR surname4 LIKE ?) ORDER BY surname1 ASC')
-										->execute($this->minImportance, '%'.$this->playersearch.'%', '%'.$this->playersearch.'%', '%'.$this->playersearch.'%', '%'.$this->playersearch.'%');
+				                           ->execute($this->minImportance, '%'.$this->playersearch.'%', '%'.$this->playersearch.'%', '%'.$this->playersearch.'%', '%'.$this->playersearch.'%');
 				$this->Template->suchtreffer = $objSuche->numRows;
 				$this->Template->suchbegriff = $this->playersearch;
 				$ergebnisliste = array();
@@ -104,16 +104,16 @@ class PlayerDetail extends \Module
 					$birthday = $this->DatumToString($objSuche->birthday);
 					$deathday = $this->DatumToString($objSuche->deathday);
 					($birthday) ? $temp = '* ' . $birthday : $temp = '';
-					if($objSuche->death) 
+					if($objSuche->death)
 					{
 						($temp) ? $temp .= '; &dagger;' : $temp = '&dagger;';
 						($deathday) ? $temp .= ' ' . $deathday : $temp .= ' unbekannt';
 					}
 					$ergebnisliste[$zaehler]['lebensdaten'] = $temp;
 					$zaehler++;
-				}			
+				}
 				$this->Template->suchergebnis = $ergebnisliste;
-				if($objSuche->numRows == 0) $this->Template->suchfehler = 'Keine Treffer für "<i>' . $this->playersearch . '</i>".'; 
+				if($objSuche->numRows == 0) $this->Template->suchfehler = 'Keine Treffer für "<i>' . $this->playersearch . '</i>".';
 			}
 			else $this->Template->suchfehler = 'Ihr Suchbegriff "<i>' . $this->playersearch . '</i>" enthält zu wenig Zeichen.';
 		}
@@ -132,7 +132,7 @@ class PlayerDetail extends \Module
 			$this->Template->todestag = $this->DatumToString($objRegister->deathday);
 			// Lebensdaten für Ausgabe aufbereiten
 			($this->Template->geburtstag) ? $temp = '* ' . $this->Template->geburtstag : $temp = '';
-			if($objRegister->death) 
+			if($objRegister->death)
 			{
 				($temp) ? $temp .= '; &dagger;' : $temp = '&dagger;';
 				($this->Template->todestag) ? $temp .= ' ' . $this->Template->todestag : $temp .= ' unbekannt';
@@ -147,26 +147,26 @@ class PlayerDetail extends \Module
 			$this->Template->chessgames_id = $objRegister->chessgames_id;
 
 			// Bilder aus multiSRC holen
-			$images = Spielerregister::Bilder($objRegister->multiSRC);
-			if($images) 
+			$images = \Schachbulle\ContaoSpielerregisterBundle\Klassen\Spielerregister::Bilder($objRegister->multiSRC);
+			if($images)
 			{
 				$this->Template->slider = true;
-				$this->Template->images = $images; 
-				$GLOBALS['TL_CSS'][] = 'system/modules/spielerregister/assets/css/js-image-slider.css';
-				$GLOBALS['TL_JAVASCRIPT'][] = 'system/modules/spielerregister/assets/js/js-image-slider.js';
+				$this->Template->images = $images;
+				$GLOBALS['TL_CSS'][] = 'bundles/contaospielerregister/css/js-image-slider.css';
+				$GLOBALS['TL_JAVASCRIPT'][] = 'bundles/contaospielerregister/js/js-image-slider.js';
 			}
 			else
 			{
-				$this->Template->slider = false; 
+				$this->Template->slider = false;
 				$images = array();
-				
+
 				// Jüngstes Bild laden
 				$objImage = $this->Database->prepare('SELECT * FROM tl_spielerregister_images WHERE pid = ? AND active = 1 ORDER BY imagedate DESC')
 				                           ->execute($objRegister->id);
 				if($objImage->numRows)
 				{
-					$GLOBALS['TL_CSS'][] = 'system/modules/spielerregister/assets/css/js-image-slider.css';
-					$GLOBALS['TL_JAVASCRIPT'][] = 'system/modules/spielerregister/assets/js/js-image-slider.js';
+					$GLOBALS['TL_CSS'][] = 'bundles/contaospielerregister/css/js-image-slider.css';
+					$GLOBALS['TL_JAVASCRIPT'][] = 'bundles/contaospielerregister/js/js-image-slider.js';
 					while($objImage->next())
 					{
 						$objFile = \FilesModel::findByPk($objImage->singleSRC);
@@ -178,7 +178,7 @@ class PlayerDetail extends \Module
 						}
 						if($objImage->copyright) $caption .= '[' . $objImage->copyright . ']';
 						// Nach Copyright per Regex suchen
-						$caption = \Samson\Helper::replaceCopyright($caption);
+						//$caption = \Samson\Helper::replaceCopyright($caption);
 						$images[$objFile->path] = array
 						(
 							'id'        => $objFile->id,
@@ -192,13 +192,13 @@ class PlayerDetail extends \Module
 						);
 					}
 					$objFile = \FilesModel::findByPk($objImage->singleSRC);
-					$this->Template->bildoriginal = $objFile->path; 
-					$this->Template->bildvorschau = \Image::get($objFile->path, 180, 180, 'center_center'); 
-					$temp = getimagesize($this->Template->bildvorschau); 
-					$this->Template->bildbreite = $temp[0]; 
-					$this->Template->bildjahr = $objImage->year; 
-					$this->Template->bildtitel = $objImage->title; 
-					$this->Template->bildquelle = $objImage->copyright; 
+					$this->Template->bildoriginal = $objFile->path;
+					$this->Template->bildvorschau = \Image::get($objFile->path, 180, 180, 'center_center');
+					$temp = getimagesize($this->Template->bildvorschau);
+					$this->Template->bildbreite = $temp[0];
+					$this->Template->bildjahr = $objImage->year;
+					$this->Template->bildtitel = $objImage->title;
+					$this->Template->bildquelle = $objImage->copyright;
 					// Bildunterschrift zusammenbauen
 					($objImage->title) ? $caption = $objImage->title : $caption = '';
 					if($objImage->year)
@@ -221,18 +221,18 @@ class PlayerDetail extends \Module
 						// Copyright hinzufügen
 						$caption = $cpstr.$caption;
 					}
-					$this->Template->caption = $caption; 
-					$this->Template->slider = true; 
-					$this->Template->images = $images; 
+					$this->Template->caption = $caption;
+					$this->Template->slider = true;
+					$this->Template->images = $images;
 				}
 				else
 				{
 					$this->Template->bildoriginal = '';
 					$this->Template->bildvorschau = '';
-					$this->Template->bildjahr = ''; 
-					$this->Template->bildtitel = ''; 
-					$this->Template->bildquelle = ''; 
-					$this->Template->caption = ''; 
+					$this->Template->bildjahr = '';
+					$this->Template->bildtitel = '';
+					$this->Template->bildquelle = '';
+					$this->Template->caption = '';
 				}
 			}
 
@@ -241,15 +241,15 @@ class PlayerDetail extends \Module
 	}
 
 	protected function LadeTag($datum) {
-	
+
 		return (0+substr($datum,6,2)).". ".$this->monatsname[0+substr($datum,4,2)];
-	
+
 	}
-	
+
 	protected function LadeJahr($datum) {
-	
+
 		return substr($datum,0,4);
-	
+
 	}
 
 	protected function DatumToString($datum) {
@@ -268,17 +268,17 @@ class PlayerDetail extends \Module
 
 	}
 
-	protected function Alter($datum, $von, $bis) 
+	protected function Alter($datum, $von, $bis)
 	{
-	
+
 		$jahr = substr($datum,0,4);
 		$vonjahr = substr($von,0,4);
 		$bisjahr = substr($bis,0,4);
-		
+
 		$monat = substr($datum,4);
 		$vonmonat = substr($von,4);
 		$bismonat = substr($bis,4);
-		
+
 		if($vonjahr == $bisjahr) {
 			// Gleiches Jahr, Berechnung ganz einfach
 			return $vonjahr - $jahr;
@@ -292,7 +292,7 @@ class PlayerDetail extends \Module
 			return $vonjahr - $jahr;
 		}
 		else return false;
-	
+
 	}
 
 }

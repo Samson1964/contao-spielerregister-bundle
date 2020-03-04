@@ -78,7 +78,7 @@ $GLOBALS['TL_DCA']['tl_spielerregister'] = array
 			(
 				'label'               => &$GLOBALS['TL_LANG']['tl_spielerregister']['export'],
 				'href'                => 'key=export',
-				'icon'                => 'system/modules/spielerregister/assets/images/image.png',
+				'icon'                => 'bundles/contaospielerregister/images/image.png',
 				'attributes'          => 'onclick="Backend.getScrollOffset();"'
 			),
 			'all' => array
@@ -987,47 +987,47 @@ https://community.contao.org/de/showthread.php?48275-DCA-Filter-erstellen-von-Ch
 				$hundertjahre = date("Ymd") - 1000000; // Aktuelles Datum minus 100 Jahre
 				$verstorben = false; // Nicht verstorben
 				$objPlayers = \Database::getInstance()->prepare("SELECT id FROM tl_spielerregister WHERE birthday <= ? AND birthday != 0 AND death = ?")
-													  ->execute($hundertjahre, $verstorben);
+				                                      ->execute();
 				$arrPlayers = is_array($arrPlayers) ? array_intersect($arrPlayers, $objPlayers->fetchEach('id')) : $objPlayers->fetchEach('id');
 				break;
 			case '2': // Geburtsdatum fehlt
 				$objPlayers = \Database::getInstance()->prepare("SELECT id FROM tl_spielerregister WHERE birthday = 0")
-													  ->execute();
+				                                      ->execute();
 				$arrPlayers = is_array($arrPlayers) ? array_intersect($arrPlayers, $objPlayers->fetchEach('id')) : $objPlayers->fetchEach('id');
 				break;
 			case '3': // Sterbedatum fehlt
 				$objPlayers = \Database::getInstance()->prepare("SELECT id FROM tl_spielerregister WHERE deathday = 0 AND death = '1'")
-													  ->execute();
+				                                      ->execute();
 				$arrPlayers = is_array($arrPlayers) ? array_intersect($arrPlayers, $objPlayers->fetchEach('id')) : $objPlayers->fetchEach('id');
 				break;
 			case '4': // Geburtsdatum unvollständig
 				$objPlayers = \Database::getInstance()->prepare("SELECT id FROM tl_spielerregister WHERE birthday % 100 = 0 AND birthday != 0")
-													  ->execute();
+				                                      ->execute();
 				$arrPlayers = is_array($arrPlayers) ? array_intersect($arrPlayers, $objPlayers->fetchEach('id')) : $objPlayers->fetchEach('id');
 				break;
 			case '5': // Sterbedatum unvollständig
 				$objPlayers = \Database::getInstance()->prepare("SELECT id FROM tl_spielerregister WHERE deathday % 100 = 0 AND deathday != 0 AND death = '1'")
-													  ->execute();
+				                                      ->execute();
 				$arrPlayers = is_array($arrPlayers) ? array_intersect($arrPlayers, $objPlayers->fetchEach('id')) : $objPlayers->fetchEach('id');
 				break;
 			case '6': // Kurzinfo fehlt
 				$objPlayers = \Database::getInstance()->prepare("SELECT id FROM tl_spielerregister WHERE shortinfo = ''")
-													  ->execute();
+				                                      ->execute();
 				$arrPlayers = is_array($arrPlayers) ? array_intersect($arrPlayers, $objPlayers->fetchEach('id')) : $objPlayers->fetchEach('id');
 				break;
 			case '7': // Vorname fehlt
 				$objPlayers = \Database::getInstance()->prepare("SELECT id FROM tl_spielerregister WHERE firstname1 = ''")
-													  ->execute();
+				                                      ->execute();
 				$arrPlayers = is_array($arrPlayers) ? array_intersect($arrPlayers, $objPlayers->fetchEach('id')) : $objPlayers->fetchEach('id');
 				break;
 			case '8': // Geburtsort fehlt
 				$objPlayers = \Database::getInstance()->prepare("SELECT id FROM tl_spielerregister WHERE birthplace = ''")
-													  ->execute();
+				                                      ->execute();
 				$arrPlayers = is_array($arrPlayers) ? array_intersect($arrPlayers, $objPlayers->fetchEach('id')) : $objPlayers->fetchEach('id');
 				break;
 			case '9': // Sterbeort fehlt
 				$objPlayers = \Database::getInstance()->prepare("SELECT id FROM tl_spielerregister WHERE deathplace = '' AND death = '1'")
-													  ->execute();
+				                                      ->execute();
 				$arrPlayers = is_array($arrPlayers) ? array_intersect($arrPlayers, $objPlayers->fetchEach('id')) : $objPlayers->fetchEach('id');
 				break;
 			case '10': // Runde Geburtstage von lebenden Personen im aktuellen Jahr (30,40,50,60,65,70,75,80,85,90,95,100)
@@ -1045,7 +1045,7 @@ https://community.contao.org/de/showthread.php?48275-DCA-Filter-erstellen-von-Ch
 				$jahr95 = $jahr - 95;
 				$jahr100 = $jahr - 100;
 				$objPlayers = \Database::getInstance()->prepare("SELECT id FROM tl_spielerregister WHERE (SUBSTR(birthday,1,4) = ? OR SUBSTR(birthday,1,4) = ? OR SUBSTR(birthday,1,4) = ? OR SUBSTR(birthday,1,4) = ? OR SUBSTR(birthday,1,4) = ? OR SUBSTR(birthday,1,4) = ? OR SUBSTR(birthday,1,4) = ? OR SUBSTR(birthday,1,4) = ? OR SUBSTR(birthday,1,4) = ? OR SUBSTR(birthday,1,4) = ? OR SUBSTR(birthday,1,4) = ? OR SUBSTR(birthday,1,4) = ?) AND death = ?")
-													  ->execute($jahr30, $jahr40, $jahr50, $jahr60, $jahr65, $jahr70, $jahr75, $jahr80, $jahr85, $jahr90, $jahr95, $jahr100, '');
+				                                      ->execute($jahr30, $jahr40, $jahr50, $jahr60, $jahr65, $jahr70, $jahr75, $jahr80, $jahr85, $jahr90, $jahr95, $jahr100, '');
 				$arrPlayers = is_array($arrPlayers) ? array_intersect($arrPlayers, $objPlayers->fetchEach('id')) : $objPlayers->fetchEach('id');
 				break;
 			

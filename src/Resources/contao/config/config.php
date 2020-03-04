@@ -11,15 +11,18 @@
  * @copyright Frank Hoppe 2014
  */
 
+/**
+ * Frontend-Module des Spielerregisters
+ */
 $GLOBALS['FE_MOD']['spielerregister'] = array
 (
-	'spielerregister_playerdetail' => 'Schachbulle\ContaoSpielerregisterBundle\PlayerDetail',
-	'spielerregister_yeardaylist'  => 'Schachbulle\ContaoSpielerregisterBundle\YeardayList',
-	'spielerregister_yearday'      => 'Schachbulle\ContaoSpielerregisterBundle\Yearday',
-	'spielerregister_honorlist'    => 'Schachbulle\ContaoSpielerregisterBundle\HonorList',
-	'spielerregister_deathlist'    => 'Schachbulle\ContaoSpielerregisterBundle\DeathList',
-	'spielerregister_titlelist'    => 'Schachbulle\ContaoSpielerregisterBundle\TitleList',
-);  
+	'spielerregister_playerdetail' => 'Schachbulle\ContaoSpielerregisterBundle\Module\PlayerDetail',
+	'spielerregister_yeardaylist'  => 'Schachbulle\ContaoSpielerregisterBundle\Module\YeardayList',
+	'spielerregister_yearday'      => 'Schachbulle\ContaoSpielerregisterBundle\Module\Yearday',
+	'spielerregister_honorlist'    => 'Schachbulle\ContaoSpielerregisterBundle\Module\HonorList',
+	'spielerregister_deathlist'    => 'Schachbulle\ContaoSpielerregisterBundle\Module\DeathList',
+	'spielerregister_titlelist'    => 'Schachbulle\ContaoSpielerregisterBundle\Module\TitleList',
+);
 
 /**
  * Backend-Module des Spielerregisters in das Backend-Menü "Inhalte" an Position 1 einfügen
@@ -28,10 +31,11 @@ array_insert($GLOBALS['BE_MOD']['content'], 1, array
 (
 	'spielerregister' => array
 	(
-	'tables'         => array('tl_spielerregister', 'tl_spielerregister_images'),
-	'icon'           => 'bundles/contaospielerregister/images/icon.png',
-	'export'         => array('Schachbulle\ContaoSpielerregisterBundle\Module\Export', 'exportSpieler')
-)); 
+		'tables'         => array('tl_spielerregister', 'tl_spielerregister_images'),
+		'icon'           => 'bundles/contaospielerregister/images/icon.png',
+		'export'         => array('Schachbulle\ContaoSpielerregisterBundle\Module\Export', 'exportSpieler')
+	)
+));
 
 /**
  * Inserttag für Registerersetzung in den Hooks anmelden

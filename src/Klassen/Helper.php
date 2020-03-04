@@ -80,6 +80,34 @@ class Helper
 	}
 
 	/**
+	 * Datumswert für Datenbank umwandeln
+	 * @param mixed
+	 * @return mixed
+	 */
+	static function putDate($varValue)
+	{
+		$laenge = strlen(trim($varValue));
+		$temp = '';
+		switch($laenge)
+		{
+			case 10: // TT.MM.JJJJ
+				$temp = substr($varValue,6,4).substr($varValue,3,2).substr($varValue,0,2);
+				break;
+			case 7: // MM.JJJJ
+				$temp = substr($varValue,3,4).substr($varValue,0,2);
+				break;
+			case 4: // JJJJ
+				$temp = $varValue;
+				break;
+			default: // anderer Wert
+				$temp = 0;
+		}
+
+		if($temp) $temp = str_pad($temp, 8, '0'); // Mit Nullen auffüllen
+		return $temp;
+	}
+
+	/**
 	 * Check input for existing only of digits (numbers)
 	 * @author Tim Boormans <info@directwebsolutions.nl>
 	 * @param $digit

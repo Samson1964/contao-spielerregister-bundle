@@ -34,28 +34,28 @@ class Export extends \Backend
 	 * @return string
 	 */
 
-	public function exportSpieler(DataContainer $dc)
+	public function exportSpieler($dc)
 	{
 		if ($this->Input->get('key') != 'export')
 		{
 			return '';
 		}
-		
+
 		// get records
 		$arrExport = array();
 		$objRow = $this->Database->prepare("SELECT surname1,firstname1,birthday,deathday,importance FROM tl_spielerregister")
-								 ->execute($dc->id);
+		                         ->execute($dc->id);
 
 		while ($objRow->next())
 		{
-			$arrExport[] = $objRow->row();			
+			$arrExport[] = $objRow->row();
 		}
 
 		// start output
-                $csv_delimiter = ';';
-                                
+		$csv_delimiter = ';';
+
 		$exportFile =  'Spielerregister-Export_' . date("Ymd-Hi");
-		
+
 		header('Content-Type: application/csv');
 		header('Content-Transfer-Encoding: binary');
 		header('Content-Disposition: attachment; filename="' . $exportFile .'.csv"');
@@ -64,18 +64,17 @@ class Export extends \Backend
 		header('Expires: 0');
 
 		$output = '';
-		$output .= '"Name"'.$csv_delimiter.'"Vorname"'.$csv_delimiter.'"Geburtsdatum"'.$csv_delimiter
-                        .'"Sterbedatum"'.$csv_delimiter.'"Wertung"'. "\n" ;
+		$output .= '"Name"'.$csv_delimiter.'"Vorname"'.$csv_delimiter.'"Geburtsdatum"'.$csv_delimiter.'"Sterbedatum"'.$csv_delimiter.'"Wertung"'. "\n" ;
 
-		foreach ($arrExport as $export) 
+		foreach ($arrExport as $export)
 		{
 			$output .= '"' . join('"'.$csv_delimiter.'"', $export).'"' . "\n";
 		}
 
 		echo $output;
 		// Popuplink generieren
-		$golink = 'contao/main.php?do=spielerregister&amp;rt=' . REQUEST_TOKEN; 
+		$golink = 'contao/main.php?do=spielerregister&amp;rt=' . REQUEST_TOKEN;
 		header('Location:' . $golink);
 	}
-	
+
 }
