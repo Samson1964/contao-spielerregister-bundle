@@ -130,4 +130,19 @@ class Helper
 		}
 	}
 
+	/**
+	 * Gibt die URL zum Detaileintrag eines Spielers zurück
+	 * @param $id       ID des Spielers in tl_spielerregister
+	 * @return string
+	 */
+	static function getPlayerlink($id)
+	{
+		// Weiterleitungsseite ermitteln, $this->spielerregister_jumpTo steht aber nur im Modul!
+		//$jumpTo = \PageModel::findByPk($this->spielerregister_jumpTo);
+
+		// z.Z. hardcodiert
+		return 'person/player/'.$id.'.html';
+		
+	}
+
 }

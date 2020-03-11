@@ -1,5 +1,9 @@
 # DSB-Spielerregister Changelog
 
+## Version 1.0.1 (2020-03-11)
+
+- Add: Funktion getPlayerlink in Helper-Klasse eingebaut, vorerst hardcodiert
+
 ## Version 1.0.0 (2020-03-04)
 
 - Delete: Prosearch-Sprachdateien entfernt
