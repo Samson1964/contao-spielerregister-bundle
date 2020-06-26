@@ -26,11 +26,8 @@ use Contao\Controller;
  * Initialize the system
  */
 define('TL_MODE', 'FE');
-define('TL_SCRIPT', 'system/modules/spielerregister/public/jahrestage.php');
-// ER2 / ER3 (dev over symlink)
-if(file_exists('../../../initialize.php')) require('../../../initialize.php');
-else require('../../../../../system/initialize.php');
-
+define('TL_SCRIPT', 'bundles/contaospielerregister/jahrestage.php');
+require($_SERVER['DOCUMENT_ROOT'].'/../system/initialize.php'); 
 
 /**
  * Class BannerClicks

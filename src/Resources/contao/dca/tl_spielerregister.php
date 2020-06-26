@@ -101,7 +101,7 @@ $GLOBALS['TL_DCA']['tl_spielerregister'] = array
 			(
 				'label'               => &$GLOBALS['TL_LANG']['tl_spielerregister']['editImage'],
 				'href'                => 'table=tl_spielerregister_images',
-				'icon'                => 'system/modules/spielerregister/assets/images/image.png'
+				'icon'                => 'bundles/contaospielerregister/images/image.png'
 			),
 			'copy' => array
 			(
