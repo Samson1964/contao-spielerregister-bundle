@@ -1,5 +1,9 @@
 # DSB-Spielerregister Changelog
 
+## Version 1.0.3 (2020-06-30)
+
+* htaccess in public entfernt
+
 ## Version 1.0.2 (2020-06-26)
 
 * Fix: jahrestage.php für Contao 4 angepaßt
