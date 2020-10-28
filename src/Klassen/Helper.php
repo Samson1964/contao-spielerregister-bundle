@@ -26,7 +26,7 @@ class Helper
 		$start = microtime(true);
 		$array = array();
 		$objRegister = \Database::getInstance()->prepare("SELECT * FROM tl_spielerregister ORDER BY surname1,firstname1 ASC ")->execute();
-		$array[0] = '-';
+		$array = array();
 		while($objRegister->next())
 		{
 			// Datum umwandeln

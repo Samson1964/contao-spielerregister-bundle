@@ -1,5 +1,9 @@
 # DSB-Spielerregister Changelog
 
+## Version 1.0.4 (2020-10-28)
+
+* Voreingestellte includeBlankOption bei Helper-Klasse getRegister entfernt
+
 ## Version 1.0.3 (2020-06-30)
 
 * htaccess in public entfernt
