@@ -46,7 +46,7 @@ class YeardayList extends \Module
 
 			return $objTemplate->parse();
 		}
-		
+
 		return parent::generate(); // Weitermachen mit dem Modul
 	}
 
@@ -55,129 +55,121 @@ class YeardayList extends \Module
 	 */
 	protected function compile()
 	{
-		$this->import('Database');
 		global $objPage;
 
 		// Weiterleitungsseite ermitteln
 		$jumpTo = \PageModel::findByPk($this->spielerregister_jumpTo);
 
 		// Zeitlichen Rahmen festlegen
-		$ZEITSTEMPEL["von"] = time();
-		$ZEITSTEMPEL["bis"] = strtotime("+" . $this->spielerregister_lastday. " day");
-		$ZEITSTEMPEL["morgen"] = strtotime("+1 day");
-		$ZEITSTEMPEL["1woche"] = strtotime("+1 week");
-		$ZEITSTEMPEL["2wochen"] = strtotime("+2 week");
-		$von = date("Ymd",$ZEITSTEMPEL["von"]);
-		$vonjahr = substr($von,0,4);
-		$heute = date("Ymd");
-		$bis = date("Ymd",$ZEITSTEMPEL["bis"]);
-		$bisjahr = substr($bis,0,4);
-		$morgen = date("Ymd",$ZEITSTEMPEL["morgen"]);
-		$wochen1 = date("Ymd",$ZEITSTEMPEL["1woche"]);
-		$wochen2 = date("Ymd",$ZEITSTEMPEL["2wochen"]);
-		
-		$objRegister = $this->Database->prepare('SELECT * FROM tl_spielerregister WHERE active = 1 AND (importance = 10 OR importance >= ?)')
-		                              ->execute($this->spielerregister_level);
+		$von = date("Ymd"); // Aktuelles Datum als JJJJMMTT
+		$vonjahr = substr($von, 0, 4); // Aktuelles Jahr als JJJJ
+		$bis = date("Ymd", strtotime("+" . $this->spielerregister_lastday. " days")); // Letztes gültiges Datum als JJJJMMTT
+		$bisjahr = substr($bis, 0, 4); // Letztes gültiges Datum als JJJJ
 
-		// Template-Objekt anlegen
-		$this->Template = new \FrontendTemplate('spielerregister_yeardays');
+		// Spieler laden, deren Bedeutung dem Level entspricht
+		$objRegister = \Database::getInstance()->prepare('SELECT * FROM tl_spielerregister WHERE active = 1 AND (importance = 10 OR importance >= ?)')
+		                                       ->execute($this->spielerregister_level);
 
 		$daten = array();
-		$zaehler = 0;
-		if($objRegister->numRows > 1)
+		if($objRegister->numRows)
 		{
-			// Datensätze anzeigen
+			// Datensätze der Reihe nach anhand der Kriterien durchsuchen
 			while($objRegister->next())
 			{
-			
+
 				$vondatum[0] = substr_replace($objRegister->birthday,$vonjahr,0,4);
 				$vondatum[1] = substr_replace($objRegister->birthday,$bisjahr,0,4);
 				$bisdatum[0] = substr_replace($objRegister->deathday,$vonjahr,0,4);
 				$bisdatum[1] = substr_replace($objRegister->deathday,$bisjahr,0,4);
-				
-				$tag = 0+substr($objRegister->birthday,6,2);
-				if(($vondatum[0] >= $von && $vondatum[0] <= $bis && $tag) || ($vondatum[1] >= $von && $vondatum[1] <= $bis && $tag)) 
+				$gtag = (int)substr($objRegister->birthday,6,2); // Tag für Geburtstagsprüfung
+				$ttag = (int)substr($objRegister->deathday,6,2); // Tag für Todestagprüfung
+				$found = false;
+
+				if(($vondatum[0] >= $von && $vondatum[0] <= $bis && $gtag) || ($vondatum[1] >= $von && $vondatum[1] <= $bis && $gtag))
+				{
+					// Geburtstag gefunden
+					$typ = 'birthday';
+					$referenztag = $objRegister->birthday;
+					$sortierung = ($vondatum[0] >= $von && $vondatum[0] <= $bis) ? $vondatum[0] : $vondatum[1];
+					$found = true;
+				}
+				if(($bisdatum[0] >= $von && $bisdatum[0] <= $bis && $ttag) || ($bisdatum[1] >= $von && $bisdatum[1] <= $bis && $ttag))
+				{
+					// Todestag gefunden
+					$typ = 'deathday';
+					$sortierung = ($bisdatum[0] >= $von && $bisdatum[0] <= $bis) ? $bisdatum[0] : $bisdatum[1];
+					$referenztag = $objRegister->deathday;
+					$found = true;
+				}
+
+				if($found)
 				{
 					// Spieler merken
-					$zaehler++;
-					$daten['typ'][$zaehler] = 'birthday';
-					$daten['id'][$zaehler] = $objRegister->id;
-					$daten['spielerlink'][$zaehler] = $jumpTo->getFrontendUrl('/player/' . $objRegister->id);
-					$daten['nachname'][$zaehler] = $objRegister->surname1;
-					$daten['vorname'][$zaehler] = $objRegister->firstname1;
-					$daten['geburtstag'][$zaehler] = $this->DatumToString($objRegister->birthday);
-					$daten['verstorben'][$zaehler] = $objRegister->death;
-					$daten['todestag'][$zaehler] = $this->DatumToString($objRegister->deathday);
-					$daten['alter'][$zaehler] = $this->Alter($objRegister->birthday, $von, $bis);
-					$daten['bedeutung'][$zaehler] = $objRegister->importance;
-					$daten['wikipedia'][$zaehler] = $objRegister->wikipedia;
-					$daten['kurzinfo'][$zaehler] = $objRegister->shortinfo;
-					if($vondatum[0] >= $von && $vondatum[0] <= $bis) $daten['sortierung'][$zaehler] = $vondatum[0];
-					else $daten['sortierung'][$zaehler] = $vondatum[1];
-					$daten['monatstag'][$zaehler] = $this->LadeTag($daten['sortierung'][$zaehler]);
-					// Jüngstes Bild laden
-					$objImage = $this->Database->prepare('SELECT * FROM tl_spielerregister_images WHERE pid = ? ORDER BY imagedate DESC LIMIT 1')
-					                           ->execute($objRegister->id);
-					if($objImage->numRows)
-					{
-						$objFile = \FilesModel::findByPk($objImage->singleSRC);
-						$thumbnail = \Image::get($objFile->path, 120, 120, 'proportional'); 
-						$daten['bild'][$zaehler] = $thumbnail;
-					}
-					else $daten['bild'][$zaehler] = '';
-					}
-					$tag = 0 + (int)substr($objRegister->deathday,6,2);
-					if(($bisdatum[0] >= $von && $bisdatum[0] <= $bis && $tag) || ($bisdatum[1] >= $von && $bisdatum[1] <= $bis && $tag)) 
-					{
-						// Spieler merken
-						$zaehler++;
-						$daten['typ'][$zaehler] = 'deathday';
-						$daten['id'][$zaehler] = $objRegister->id;
-						$daten['spielerlink'][$zaehler] = $jumpTo->getFrontendUrl('/player/' . $objRegister->id);
-						$daten['nachname'][$zaehler] = $objRegister->surname1;
-						$daten['vorname'][$zaehler] = $objRegister->firstname1;
-						$daten['geburtstag'][$zaehler] = $this->DatumToString($objRegister->birthday);
-						$daten['verstorben'][$zaehler] = $objRegister->death;
-						$daten['todestag'][$zaehler] = $this->DatumToString($objRegister->deathday);
-						$daten['alter'][$zaehler] = $this->Alter($objRegister->deathday, $von, $bis);
-						$daten['bedeutung'][$zaehler] = $objRegister->importance;
-						$daten['wikipedia'][$zaehler] = $objRegister->wikipedia;
-						$daten['kurzinfo'][$zaehler] = $objRegister->shortinfo;
-				 		if($bisdatum[0] >= $von && $bisdatum[0] <= $bis) $daten['sortierung'][$zaehler] = $bisdatum[0];
-						else $daten['sortierung'][$zaehler] = $bisdatum[1];
-						$daten['monatstag'][$zaehler] = $this->LadeTag($daten['sortierung'][$zaehler]);
-						// Jüngstes Bild laden
-						$objImage = $this->Database->prepare('SELECT * FROM tl_spielerregister_images WHERE pid = ? ORDER BY imagedate DESC LIMIT 1')
-						                           ->execute($objRegister->id);
-						if($objImage->numRows)
-						{
-							$objFile = \FilesModel::findByPk($objImage->singleSRC);
-							$thumbnail = \Image::get($objFile->path, 120, 120, 'proportional'); 
-							$daten['bild'][$zaehler] = $thumbnail;
-						}
-						else $daten['bild'][$zaehler] = '';
-					}
+
+					// Daten vorbereiten
+					$image = \Schachbulle\ContaoSpielerregisterBundle\Klassen\Spielerregister::Bilder($objRegister->multiSRC, true); // Aktuellstes Bild laden
+
+					// Daten zuweisen
+					$daten[] = array
+					(
+						'typ'          => $typ,
+						'id'           => $objRegister->id,
+						'spielerlink'  => $jumpTo->getFrontendUrl('/player/' . $objRegister->id),
+						'nachname'     => $objRegister->surname1,
+						'vorname'      => $objRegister->firstname1,
+						'geburtstag'   => $this->DatumToString($objRegister->birthday),
+						'verstorben'   => $objRegister->death,
+						'todestag'     => $this->DatumToString($objRegister->deathday),
+						'alter'        => $this->Alter($referenztag, $von, $bis),
+						'bedeutung'    => $objRegister->importance,
+						'wikipedia'    => $objRegister->wikipedia,
+						'kurzinfo'     => $objRegister->shortinfo,
+						'sortierung'   => $sortierung,
+						'monatstag'    => $this->LadeTag($sortierung),
+						'image'        => $image ? $image['image'] : false,
+						'imageSize'    => $image ? $image['imageSize'] : false,
+						'imageTitle'   => $image ? $image['imageTitle'] : false,
+						'imageAlt'     => $image ? $image['imageAlt'] : false,
+						'imageCaption' => $image ? $image['imageCaption'] : false,
+						'thumbnail'    => $image ? $image['thumbnail'] : false
+					);
+				}
 			}
 		}
-		
-		// Daten sortieren
-		if($daten['sortierung']) array_multisort($daten['sortierung'],$daten['monatstag'],$daten['id'],$daten['typ'],$daten['nachname'],$daten['vorname'],$daten['geburtstag'],$daten['verstorben'],$daten['todestag'],$daten['alter'],$daten['bedeutung'],$daten['wikipedia'],$daten['kurzinfo'],$daten['bild'],$daten['spielerlink']);
-		
-		$this->Template->Ausgabe = $daten;
-		$this->Template->Anzahl = $zaehler;
+
+		// Gefundene Spieler sortieren
+		$sortiert = array();
+		if(count($daten) > 0)
+		{
+			$sortiert = \Schachbulle\ContaoHelperBundle\Classes\Helper::sortArrayByFields
+			(
+				$daten,
+				array
+				(
+					'sortierung' => SORT_ASC,
+					'monatstag'  => SORT_ASC,
+					'id'         => SORT_ASC
+				)
+			);
+		}
+
+		// Template-Objekt anlegen und Daten zuweisen
+		$this->Template = new \FrontendTemplate('spielerregister_yeardays');
+		$this->Template->Ausgabe = $sortiert;
+		$this->Template->Anzahl = count($daten);
 
 	}
 
 	protected function LadeTag($datum) {
-	
+
 		return (0+substr($datum,6,2)).". ".$this->monatsname[0+substr($datum,4,2)];
-	
+
 	}
-	
+
 	protected function LadeJahr($datum) {
-	
+
 		return substr($datum,0,4);
-	
+
 	}
 
 	protected function DatumToString($datum) {
@@ -196,17 +188,17 @@ class YeardayList extends \Module
 
 	}
 
-	protected function Alter($datum, $von, $bis) 
+	protected function Alter($datum, $von, $bis)
 	{
-	
+
 		$jahr = substr($datum,0,4);
 		$vonjahr = substr($von,0,4);
 		$bisjahr = substr($bis,0,4);
-		
+
 		$monat = substr($datum,4);
 		$vonmonat = substr($von,4);
 		$bismonat = substr($bis,4);
-		
+
 		if($vonjahr == $bisjahr) {
 			// Gleiches Jahr, Berechnung ganz einfach
 			return $vonjahr - $jahr;
@@ -220,7 +212,7 @@ class YeardayList extends \Module
 			return $vonjahr - $jahr;
 		}
 		else return false;
-	
+
 	}
 
 }

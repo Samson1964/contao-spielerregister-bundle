@@ -6,12 +6,7 @@
 #sliderFrame 
 {
     position:relative;
-    width:180px;
     margin:0 auto; /*center-aligned*/
-}
-
-#slider, #slider div.sliderInner {
-    width:180px;height:180px;/* Must be the same size as the slider images */
 }
 
 #slider {

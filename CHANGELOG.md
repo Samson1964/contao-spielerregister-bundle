@@ -1,5 +1,17 @@
 # DSB-Spielerregister Changelog
 
+## Version 2.0.0 (2020-12-14)
+
+* Fix: Too few arguments to build the query string (dca/tl_spielerregister.php->execute - line 990) - SQL-Fehler bei "Nicht verstorben, älter als 100 Jahre"
+* Add: Abhängigkeit schachbulle/contao-helper-bundle
+* Add: Auskommentierte Aufrufe \Samson\Helper ersetzt durch \Schachbulle\ContaoHelperBundle\Classes\Helper
+* Add: Bildgröße in System -> Einstellungen festlegen
+* Fix: Funktion \Schachbulle\ContaoSpielerregisterBundle\Klassen\Spielerregister::Bilder umgebaut
+* Change: YeardayList.php komplett neu programmiert
+* Change: Template spielerregister_yeardays komplett auf Contao 4 umgebaut
+* Change: PlayerDetail.php an die neue Bildgenerierung angepaßt
+* Change: Template spielerregister_yeardays komplett auf Contao 4 umgebaut
+
 ## Version 1.0.4 (2020-10-28)
 
 * Voreingestellte includeBlankOption bei Helper-Klasse getRegister entfernt

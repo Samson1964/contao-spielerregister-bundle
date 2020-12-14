@@ -1,66 +1,54 @@
-<?php //$this->showTemplateVars(); ?>
+<?php $this->extend('block_searchable'); ?>
+
+<?php $this->block('content'); ?>
 
 <div id="spielerregister">
+	<?php $altdatum = ''; ?>
+	<?php foreach($this->Ausgabe as $item): ?>
+		<?php if($altdatum != $item['monatstag']): ?>
+			<?php $altdatum = $item['monatstag']; ?>
+			<h2 class="tag"><?= $item['monatstag'] ?></h2>
+		<?php endif; ?>
 
-<?php 
-$altdatum = '';
-for($i=0;$i<$this->Anzahl;$i++)
-{
+		<div class="biographie bedeutung<?= $item['bedeutung'] ?>">
 
-	// Tag ausgeben, wenn nötig
-	if($altdatum != $this->Ausgabe['monatstag'][$i])
-	{
-		$altdatum = $this->Ausgabe['monatstag'][$i];
-		echo '<h2 class="tag">' . $this->Ausgabe['monatstag'][$i] . '</h2>';
-	}
+			<?php if($item['thumbnail']): ?>
+				<figure>
+					<?php if($item['image']): ?>
+						<a href="<?= $item['image'] ?>" data-lightbox="vl<?= $item['id'] ?>"><img src="<?= $item['thumbnail'] ?>"<?= $item['imageSize'] ?> alt="<?= $item['imageAlt'] ?>" title="<?= $item['imageTitle'] ?>"></a>
+					<?php endif; ?>
+					<figcaption><?= $item['imageCaption'] ?></figcaption>
+				</figure>
+			<?php endif; ?>
 
-	// Container ausgeben
-	echo '<div class="biographie bedeutung' . $this->Ausgabe['bedeutung'][$i] . '">';
+			<h3 class="spielername">
+				<?php if($item['wikipedia']): ?>
+					<a href="http://de.wikipedia.org/wiki/<?= $item['wikipedia'] ?>" target="_blank"><img src="bundles/contaospielerregister/images/wikipedia.png" alt=""></a>
+				<?php endif; ?>
+				<a href="<?= $item['spielerlink'] ?>"><?= $item['vorname'] ?> <?= $item['nachname'] ?></a>
+				<?php if($item['verstorben']): ?>
+					(&dagger;)
+				<?php endif; ?>
+			</h3>
 
-	// Bild ausgeben
-	if($this->Ausgabe['bild'][$i])
-	{
-		echo '<figure>';
-		echo '<img src="' . $this->Ausgabe['bild'][$i] . '" alt="">';
-		echo '</figure>';
-	}
+			<div class="jahrestagart">
+				<?= $item['alter'] ?>.
+				<?php if($item['alter'] && $item['typ'] == 'birthday'): ?>
+					Geburtstag
+				<?php endif; ?>
+				<?php if($item['alter'] && $item['typ'] == 'deathday'): ?>
+					Todestag
+				<?php endif; ?>
+			</div>
 
-	// Spielername ausgeben
-	echo '<h3 class="spielername">';
-	if($this->Ausgabe['wikipedia'][$i])
-	{
-		echo '<a href="http://de.wikipedia.org/wiki/' . $this->Ausgabe['wikipedia'][$i] . '" target="_blank"><img src="system/modules/spielerregister/assets/images/wikipedia.png" alt=""></a> ';
-	}
-	echo '<a href="'. $this->Ausgabe['spielerlink'][$i] .'">' . $this->Ausgabe['vorname'][$i] . ' ';
-	echo $this->Ausgabe['nachname'][$i] . '</a>';
-	if($this->Ausgabe['verstorben'][$i]) echo ' (&dagger;)';
-	echo '</h3>';
-	
-	// Lebensdaten ausgeben
-	// echo '<div class="lebensdaten">';
-	// if($this->Ausgabe['typ'][$i] == 'birthday') echo '<span class="jahrestag">* ' . $this->Ausgabe['geburtstag'][$i] . '</span>';
-	// else echo '* ' . $this->Ausgabe['geburtstag'][$i];
-	// if($this->Ausgabe['typ'][$i] == 'deathday') echo '; <span class="jahrestag">&dagger; ' . $this->Ausgabe['todestag'][$i] . '</span>';
-	// elseif($this->Ausgabe['verstorben'][$i]) echo '; &dagger; ' . $this->Ausgabe['todestag'][$i];
-	// echo '</div>';
-	
-	// Jahrestagart ausgeben
-	echo '<div class="jahrestagart">';
-	if($this->Ausgabe['alter'][$i] && $this->Ausgabe['typ'][$i] == 'birthday') echo $this->Ausgabe['alter'][$i] . '. Geburtstag';
-	if($this->Ausgabe['alter'][$i] && $this->Ausgabe['typ'][$i] == 'deathday') echo $this->Ausgabe['alter'][$i] . '. Todestag';
-	echo '</div>';
+			<?php if($item['kurzinfo']): ?>
+				<div class="kurzinfo">
+					<?= $item['kurzinfo'] ?>
+				</div>
+			<?php endif; ?>
 
-	// Kurzinfo ausgeben
-	if($this->Ausgabe['kurzinfo'][$i])
-	{
-		echo '<div class="kurzinfo">';
-		echo $this->Ausgabe['kurzinfo'][$i];
-		echo '</div>';
-	}
-
-	// Container beenden
-	echo '</div>';
-}
-
-?>
+		</div>
+	<?php endforeach; ?>
 </div>
+
+<?php $this->endblock(); ?>

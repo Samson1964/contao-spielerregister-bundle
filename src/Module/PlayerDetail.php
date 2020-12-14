@@ -64,15 +64,14 @@ class PlayerDetail extends \Module
 	 */
 	protected function compile()
 	{
-		$this->import('Database');
 		global $objPage;
 
 		// Weiterleitungsseite ermitteln
 		$jumpTo = \PageModel::findByPk($this->spielerregister_jumpTo);
 
-		$objRegister = $this->Database->prepare('SELECT * FROM tl_spielerregister WHERE active = 1 AND importance >= ? AND id = ?')
-		                              ->limit(1)
-		                              ->execute($this->minImportance, $this->playerid);
+		$objRegister = \Database::getInstance()->prepare('SELECT * FROM tl_spielerregister WHERE active = 1 AND importance >= ? AND id = ?')
+		                                       ->limit(1)
+		                                       ->execute($this->minImportance, $this->playerid);
 
 		// Template-Objekt anlegen
 		$this->Template = new \FrontendTemplate('spielerregister_playerdetail');
@@ -89,8 +88,8 @@ class PlayerDetail extends \Module
 			if($suchlaenge > 1)
 			{
 				// Sucht nach Suchbegriff über alle 4 Nachnamenfelder
-				$objSuche = $this->Database->prepare('SELECT * FROM tl_spielerregister WHERE active = 1 AND importance >= ? AND (surname1 LIKE ? OR surname2 LIKE ? OR surname3 LIKE ? OR surname4 LIKE ?) ORDER BY surname1 ASC')
-				                           ->execute($this->minImportance, '%'.$this->playersearch.'%', '%'.$this->playersearch.'%', '%'.$this->playersearch.'%', '%'.$this->playersearch.'%');
+				$objSuche = \Database::getInstance()->prepare('SELECT * FROM tl_spielerregister WHERE active = 1 AND importance >= ? AND (surname1 LIKE ? OR surname2 LIKE ? OR surname3 LIKE ? OR surname4 LIKE ?) ORDER BY surname1 ASC')
+				                                    ->execute($this->minImportance, '%'.$this->playersearch.'%', '%'.$this->playersearch.'%', '%'.$this->playersearch.'%', '%'.$this->playersearch.'%');
 				$this->Template->suchtreffer = $objSuche->numRows;
 				$this->Template->suchbegriff = $this->playersearch;
 				$ergebnisliste = array();
@@ -150,6 +149,17 @@ class PlayerDetail extends \Module
 			$images = \Schachbulle\ContaoSpielerregisterBundle\Klassen\Spielerregister::Bilder($objRegister->multiSRC);
 			if($images)
 			{
+				// Größte Breite und Höhe ermitteln
+				$breite = 0;
+				$hoehe = 0;
+				foreach($images as $bild)
+				{
+					if($bild['imageWidth'] > $breite) $breite = $bild['imageWidth'];
+					if($bild['imageHeight'] > $hoehe) $hoehe = $bild['imageHeight'];
+				}
+				$this->Template->imageWidth = $breite;
+				$this->Template->imageHeight = $hoehe;
+
 				$this->Template->slider = true;
 				$this->Template->images = $images;
 				$GLOBALS['TL_CSS'][] = 'bundles/contaospielerregister/css/js-image-slider.css';
@@ -161,8 +171,8 @@ class PlayerDetail extends \Module
 				$images = array();
 
 				// Jüngstes Bild laden
-				$objImage = $this->Database->prepare('SELECT * FROM tl_spielerregister_images WHERE pid = ? AND active = 1 ORDER BY imagedate DESC')
-				                           ->execute($objRegister->id);
+				$objImage = \Database::getInstance()->prepare('SELECT * FROM tl_spielerregister_images WHERE pid = ? AND active = 1 ORDER BY imagedate DESC')
+				                                    ->execute($objRegister->id);
 				if($objImage->numRows)
 				{
 					$GLOBALS['TL_CSS'][] = 'bundles/contaospielerregister/css/js-image-slider.css';
@@ -178,7 +188,7 @@ class PlayerDetail extends \Module
 						}
 						if($objImage->copyright) $caption .= '[' . $objImage->copyright . ']';
 						// Nach Copyright per Regex suchen
-						//$caption = \Samson\Helper::replaceCopyright($caption);
+						$caption = \Schachbulle\ContaoHelperBundle\Classes\Helper::replaceCopyright($caption);
 						$images[$objFile->path] = array
 						(
 							'id'        => $objFile->id,
@@ -200,28 +210,15 @@ class PlayerDetail extends \Module
 					$this->Template->bildtitel = $objImage->title;
 					$this->Template->bildquelle = $objImage->copyright;
 					// Bildunterschrift zusammenbauen
-					($objImage->title) ? $caption = $objImage->title : $caption = '';
+					$caption = $objImage->title ? $objImage->title : '';
+
 					if($objImage->year)
 					{
 						($caption) ? $caption .= ' (' . $objImage->year . ')' : $caption = $objImage->year;
 					}
 					if($objImage->copyright) $caption .= '[' . $objImage->copyright . ']';
-					// Nach Copyright per Regex suchen
-					$found = preg_match("/(\[.+\])/",$caption,$treffer,PREG_OFFSET_CAPTURE);
-					if($found)
-					{
-						// Copyright gefunden, Länge und Position speichern
-						$cplen = strlen($treffer[0][0]);
-						$cppos = $treffer[0][1];
-						// Copyright ersetzen
-						$cpstr = str_replace("[","<div class=\"rechte\">",$treffer[0][0]);
-						$cpstr = str_replace("]","</div>",$cpstr);
-						// Restliche Bildunterschrift extrahieren
-						$caption = substr($caption,0,$cppos).substr($caption,$cppos+$cplen);
-						// Copyright hinzufügen
-						$caption = $cpstr.$caption;
-					}
-					$this->Template->caption = $caption;
+
+					$this->Template->caption = \Schachbulle\ContaoHelperBundle\Classes\Helper::replaceCopyright($caption);
 					$this->Template->slider = true;
 					$this->Template->images = $images;
 				}

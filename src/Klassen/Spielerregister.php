@@ -15,141 +15,131 @@
  */
 namespace Schachbulle\ContaoSpielerregisterBundle\Klassen;
 
-class Spielerregister 
+class Spielerregister
 {
 
 	/**
 	 * Gibt ein Array mit den Spielerbildern zurück
-	 * @param string	Serialisiertes Array mit den Daten
+	 * @param string    string      Serialisiertes Array mit den Daten
+	 * @param boolean   newestImage false = alle Bilder zurückgeben, true = nur 1 Bild zurückgeben (das jüngste)
 	 * @return array
 	 */
-	public static function Bilder($string) 
+	public static function Bilder($string, $newestImage = false)
 	{
 		global $objPage;
 
-		$multiSRC = deserialize($string);
-		if(!is_array($multiSRC) || empty($multiSRC))
+		// Serialisierten Bilderstring in Array umwandeln und Bilder suchen
+		$multiSRC = unserialize($string);
+		if(is_array($multiSRC))
 		{
-			return '';
+			$objFiles = \FilesModel::findMultipleByUuids($multiSRC); // Bilder aus Datenbank laden
 		}
 		else
 		{
-			// Get the file entries from the database
-			$objFiles = \FilesModel::findMultipleByUuids($multiSRC);
+			return false; // Keine Bilder übergeben
 		}
 
 		$images = array();
-		$auxDate = array();
+		$imageSize = unserialize($GLOBALS['TL_CONFIG']['spielerregister_imageSize']);
 
-		// Get all images
-		while ($objFiles->next())
+		if($objFiles)
 		{
-			// Continue if the files has been processed or does not exist
-			if (isset($images[$objFiles->path]) || !file_exists(TL_ROOT . '/' . $objFiles->path))
+			// Alle Datensätze iterieren
+			while($objFiles->next())
 			{
-				continue;
-			}
+				
+				$objItem = \FilesModel::findByUuid($objFiles->uuid); // Objekt vom aktuellen Datensatz erstellen
 
-			// Single files
-			if ($objFiles->type == 'file')
-			{
-				$objFile = new \File($objFiles->path, true);
-
-				if (!$objFile->isImage)
+				if($objFiles->type == 'file')
 				{
-					continue;
-				}
+					// Datei
 
-				$arrMeta = \Frontend::getMetaData($objFiles->meta, $objPage->language);
+					$objBild = new \stdClass();
+					\Controller::addImageToTemplate($objBild, array('singleSRC' => $objFiles->path, 'size' => $imageSize), \Config::get('maxImageWidth'), null, $objItem); // aktuelles $objekt übergeben!
+					//\Controller::addImageToTemplate($objBild, array('singleSRC' => $objFiles->path, 'size' => $imageSize), \Config::get('maxImageWidth'));
 
-				// Use the file name as title if none is given
-				if ($arrMeta['title'] == '')
-				{
-					$arrMeta['title'] = specialchars($objFile->basename);
-				}
-				// Bildunterschrift modifizieren
-				if($arrMeta['caption'] == '')
-				{
-					$arrMeta['caption'] = self::ExtractCaption(specialchars($objFile->filename));
-				}
-
-				// Add the image
-				$images[$objFiles->path] = array
-				(
-					'id'        => $objFiles->id,
-					'uuid'      => $objFiles->uuid,
-					'name'      => $objFile->basename,
-					'singleSRC' => $objFiles->path,
-					'alt'       => $arrMeta['title'],
-					'imageUrl'  => $arrMeta['link'],
-					'caption'   => $arrMeta['caption'], //\Samson\Helper::replaceCopyright($arrMeta['caption']),
-					'thumb'     => \Image::get($objFiles->path, 180, 180, 'center_center')
-				);
-
-				$auxDate[] = $objFile->mtime;
-			}
-
-			// Folders
-			else
-			{
-				$objSubfiles = \FilesModel::findByPid($objFiles->uuid);
-
-				if ($objSubfiles === null)
-				{
-					continue;
-				}
-
-				while ($objSubfiles->next())
-				{
-					// Skip subfolders
-					if ($objSubfiles->type == 'folder')
-					{
-						continue;
-					}
-
-					$objFile = new \File($objSubfiles->path, true);
-
-					if (!$objFile->isImage)
-					{
-						continue;
-					}
-
-					$arrMeta = \Frontend::getMetaData($objSubfiles->meta, $objPage->language);
-
-					// Use the file name as title if none is given
-					if ($arrMeta['title'] == '')
-					{
-						$arrMeta['title'] = specialchars($objFile->basename);
-					}
-					// Bildunterschrift modifizieren
-					if($arrMeta['caption'] == '')
-					{
-						$arrMeta['caption'] = self::ExtractCaption(specialchars($objFile->filename));
-					}
-
-					// Add the image
-					$images[$objSubfiles->path] = array
+					// Bild hinzufügen
+					$images[] = array
 					(
-						'id'        => $objSubfiles->id,
-						'uuid'      => $objSubfiles->uuid,
-						'name'      => $objFile->basename,
-						'singleSRC' => $objSubfiles->path,
-						'alt'       => $arrMeta['title'],
-						'imageUrl'  => $arrMeta['link'],
-						'caption'   => \Samson\Helper::replaceCopyright($arrMeta['caption']),
-						'thumb'     => Image::get($objSubfiles->path, 180, 180, 'center_center')
+						'imageID'      => mt_rand(),
+						'imageWidth'   => $objBild->arrSize[0],
+						'imageHeight'  => $objBild->arrSize[1],
+						'tstamp'       => $objFiles->tstamp,
+						'image'        => $objBild->singleSRC,
+						'imageSize'    => $objBild->imgSize,
+						'imageTitle'   => $objBild->imageTitle,
+						'imageAlt'     => $objBild->alt,
+						'imageCaption' => \Schachbulle\ContaoHelperBundle\Classes\Helper::replaceCopyright($objBild->caption),
+						'thumbnail'    => $objBild->src
 					);
-
-					$auxDate[] = $objFile->mtime;
 				}
+				else
+				{
+					// Ordner
+					$objSubfiles = \FilesModel::findByPid($objFiles->uuid); // Dateien des Ordners finden
+
+					if($objSubfiles->type == 'file')
+					{
+						// Alle Datensätze iterieren
+						while($objSubfiles->next())
+						{
+
+							$objItem = \FilesModel::findByUuid($objSubfiles->uuid); // Objekt vom aktuellen Datensatz erstellen
+
+							// Datei
+							$objBild = new \stdClass();
+							\Controller::addImageToTemplate($objBild, array('singleSRC' => $objSubfiles->path, 'size' => $imageSize), \Config::get('maxImageWidth'), null, $objItem); // aktuelles $objekt übergeben!
+							//\Controller::addImageToTemplate($objBild, array('singleSRC' => $objSubfiles->path, 'size' => $imageSize), \Config::get('maxImageWidth'));
+
+							// Bild hinzufügen
+							$images[] = array
+							(
+								'imageID'      => mt_rand(),
+								'imageWidth'   => $objBild->arrSize[0],
+								'imageHeight'  => $objBild->arrSize[1],
+								'tstamp'       => $objSubfiles->tstamp,
+								'image'        => $objBild->singleSRC,
+								'imageSize'    => $objBild->imgSize,
+								'imageTitle'   => $objBild->imageTitle,
+								'imageAlt'     => $objBild->alt,
+								'imageCaption' => \Schachbulle\ContaoHelperBundle\Classes\Helper::replaceCopyright($objBild->caption),
+								'thumbnail'    => $objBild->src
+							);
+						}
+					}
+
+				}
+
 			}
 		}
 
-		return $images;
-	
+		if($newestImage)
+		{
+			// Nur das neueste Bild zurückgeben
+			$zeitstempel = 0; // Zeitstempel initialisieren, um aktuellstes Bild zu speichern
+			$markiert = -1; // Damit wird der Index gesichert
+			for($x = 0; $x < count($images); $x++)
+			{
+				if($images[$x]['tstamp'] > $zeitstempel)
+				{
+					// Aktuelleres Bild gefunden und merken
+					$markiert = $x;
+					$zeitstempel = $images[$x]['tstamp'];
+				}
+			}
+			// Ausgabe
+			if($markiert == -1) return false;
+			else
+			{
+				return $images[$markiert];
+			}
+		}
+
+		return $images; // Bilder-Array zurückgeben
+
 	}
 
-	public static function ExtractCaption($string) 
+	public static function ExtractCaption($string)
 	{
 		$parts = explode('_', $string); // Dateiname trennen
 
@@ -157,9 +147,9 @@ class Spielerregister
 		{
 			if(is_numeric($part)) return $part;
 		}
-		
+
 		return '';
-	
+
 	}
 
 	public function ReplacePlayer($strTag)
@@ -215,7 +205,7 @@ class Spielerregister
 				$this->Template->playername = $data[1] ? $data[1] : $data[0];
 				$this->Template->gefunden = false;
 			}
-						
+
 			// Geparstes Template zurückgeben
 			return $this->Template->parse();
 		}
