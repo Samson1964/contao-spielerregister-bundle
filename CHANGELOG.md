@@ -1,5 +1,15 @@
 # DSB-Spielerregister Changelog
 
+## Version 2.0.1 (2020-12-17)
+
+* Fix: Umlaute beim Alias wurden nicht ersetzt
+* Fix: Links wurden in jahrestage.php nicht richtig ersetzt
+* Fix: Backend Suchen-Filter verbessert
+* Fix: Infobox bei Spieler bearbeiten zu weit links
+* Change: Funktion listPersons durch listRecords ausgetauscht, dabei BE-Ansicht verbessert
+* Change: Übersetzungen tl_spielerregister überarbeitet
+* Fix: tl_spielerregister.importance als int statt char definiert, damit numerisch sortiert werden kann
+
 ## Version 2.0.0 (2020-12-14)
 
 * Fix: Too few arguments to build the query string (dca/tl_spielerregister.php->execute - line 990) - SQL-Fehler bei "Nicht verstorben, älter als 100 Jahre"

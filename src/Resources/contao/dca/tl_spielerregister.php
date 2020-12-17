@@ -68,9 +68,10 @@ $GLOBALS['TL_DCA']['tl_spielerregister'] = array
 		),
 		'label' => array
 		(
-			'fields'                  => array('surname1', 'firstname1'),
+			'fields'                  => array('surname1', 'firstname1', 'birthday', 'deathday', 'tstamp'),
 			'format'                  => '%s, %s',
-			'label_callback'          => array('tl_spielerregister', 'listPersons')
+			'showColumns'             => true,
+			'label_callback'          => array('tl_spielerregister', 'listRecords')
 		),
 		'global_operations' => array
 		(
@@ -156,6 +157,8 @@ $GLOBALS['TL_DCA']['tl_spielerregister'] = array
 		),
 		'tstamp' => array
 		(
+			'flag'                    => 5,
+			'sorting'                 => true,
 			'sql'                     => "int(10) unsigned NOT NULL default '0'"
 		),
 		'createtime' => array
@@ -267,7 +270,7 @@ $GLOBALS['TL_DCA']['tl_spielerregister'] = array
 		(
 			'label'                   => &$GLOBALS['TL_LANG']['tl_spielerregister']['birthday'],
 			'exclude'                 => true,
-			'search'                  => true,
+			'search'                  => false,
 			'sorting'                 => true,
 			'flag'                    => 11,
 			'inputType'               => 'text',
@@ -322,9 +325,9 @@ $GLOBALS['TL_DCA']['tl_spielerregister'] = array
 		(
 			'label'                   => &$GLOBALS['TL_LANG']['tl_spielerregister']['deathday'],
 			'exclude'                 => true,
-			'search'                  => true,
+			'search'                  => false,
 			'sorting'                 => true,
-			'flag'                    => 11,
+			'flag'                    => 12,
 			'inputType'               => 'text',
 			'eval'                    => array
 			(
@@ -485,14 +488,14 @@ $GLOBALS['TL_DCA']['tl_spielerregister'] = array
 			'label'                   => &$GLOBALS['TL_LANG']['tl_spielerregister']['importance'],
 			'exclude'                 => true,
 			'default'                 => 5,
-			'search'                  => true,
+			'search'                  => false,
 			'filter'                  => true,
 			'sorting'                 => true,
 			'flag'                    => 12,
 			'inputType'               => 'select',
 			'options'                 => array(10, 9, 8, 7, 6, 5, 4, 3, 2, 1),
 			'reference'               => &$GLOBALS['TL_LANG']['tl_spielerregister'],
-			'sql'                     => "char(2) NOT NULL default '5'"
+			'sql'                     => "int(2) unsigned NOT NULL default '5'"
 		), 
 		// Person hat GM-Titel der FIDE
 		'gm_title' => array
@@ -509,8 +512,8 @@ $GLOBALS['TL_DCA']['tl_spielerregister'] = array
 		(
 			'label'                   => &$GLOBALS['TL_LANG']['tl_spielerregister']['gm_date'],
 			'exclude'                 => true,
-			'search'                  => true,
-			'sorting'                 => true,
+			'search'                  => false,
+			'sorting'                 => false,
 			'flag'                    => 11,
 			'inputType'               => 'text',
 			'eval'                    => array
@@ -544,8 +547,8 @@ $GLOBALS['TL_DCA']['tl_spielerregister'] = array
 		(
 			'label'                   => &$GLOBALS['TL_LANG']['tl_spielerregister']['im_date'],
 			'exclude'                 => true,
-			'search'                  => true,
-			'sorting'                 => true,
+			'search'                  => false,
+			'sorting'                 => false,
 			'flag'                    => 11,
 			'inputType'               => 'text',
 			'eval'                    => array
@@ -579,8 +582,8 @@ $GLOBALS['TL_DCA']['tl_spielerregister'] = array
 		(
 			'label'                   => &$GLOBALS['TL_LANG']['tl_spielerregister']['wgm_date'],
 			'exclude'                 => true,
-			'search'                  => true,
-			'sorting'                 => true,
+			'search'                  => false,
+			'sorting'                 => false,
 			'flag'                    => 11,
 			'inputType'               => 'text',
 			'eval'                    => array
@@ -614,8 +617,8 @@ $GLOBALS['TL_DCA']['tl_spielerregister'] = array
 		(
 			'label'                   => &$GLOBALS['TL_LANG']['tl_spielerregister']['wim_date'],
 			'exclude'                 => true,
-			'search'                  => true,
-			'sorting'                 => true,
+			'search'                  => false,
+			'sorting'                 => false,
 			'flag'                    => 11,
 			'inputType'               => 'text',
 			'eval'                    => array
@@ -779,35 +782,14 @@ class tl_spielerregister extends Backend
 	 * @param array
 	 * @return string
 	 */
-	public function listPersons($arrRow)
-	{ 
-		// Name und Vorname ausgeben
-		$temp = $arrRow['surname1'];
-		if($arrRow['firstname1']) $temp .= ', ' . $arrRow['firstname1'];
-		// Lebensdaten ausgeben
-		$birthday = \Schachbulle\ContaoSpielerregisterBundle\Klassen\Helper::getDate($arrRow['birthday']);
-		$deathday = \Schachbulle\ContaoSpielerregisterBundle\Klassen\Helper::getDate($arrRow['deathday']);
-		$death = $arrRow['death'];
-		// Summe bilden für weitere Operationen
-		$summe = 0;
-		if($birthday) $summe += 1;
-		if($deathday) $summe += 2;
-		if($death) $summe += 4;
-		// Summe abfragen und Text bauen
-		switch($summe)
-		{
-			case 1: $temp .= ' (* ' . $birthday . ')'; break;
-			case 2: 
-			case 6: $temp .= ' (* ?, &dagger; ' . $deathday . ')'; break;
-			case 3: 
-			case 7: $temp .= ' (* '.$birthday.', &dagger; '.$deathday . ')'; break;
-			case 4: $temp .= ' (* ?, &dagger; ?)'; break;
-			case 5: $temp .= ' (* '.$birthday.', &dagger; ?)'; break;
-			default:
-		}
-		return $temp;
-	}
+	public function listRecords($row, $label, Contao\DataContainer $dc, $args)
+	{
+		$args[2] = \Schachbulle\ContaoSpielerregisterBundle\Klassen\Helper::getDate($args[2]); // Geburtstag von JJJJMMTT umwandeln in TT.MM.JJJJ
+		$args[3] = \Schachbulle\ContaoSpielerregisterBundle\Klassen\Helper::getDate($args[3]); // Sterbetag von JJJJMMTT umwandeln in TT.MM.JJJJ
 
+		// Datensatz komplett zurückgeben
+		return $args;
+	}
 
 	/**
 	 * Generiert automatisch ein Alias aus allen Vornamen und allen Nachnamen
@@ -818,6 +800,10 @@ class tl_spielerregister extends Backend
 	 */
 	public function generateAlias(DataContainer $dc)
 	{
+		
+		static $suchen = array('Ä', 'Ö', 'Ü', 'ß', 'é', 'ä', 'ö', 'ü');
+		static $ersetzen = array('ae', 'oe', 'ue', 'ss', 'e', 'ae', 'oe', 'ue');
+		
 		$temp = $dc->activeRecord->surname1;
 		if($dc->activeRecord->surname2) $temp .= '-'.$dc->activeRecord->surname2;
 		if($dc->activeRecord->surname3) $temp .= '-'.$dc->activeRecord->surname3;
@@ -827,7 +813,17 @@ class tl_spielerregister extends Backend
 		if($dc->activeRecord->firstname3) $temp .= '-'.$dc->activeRecord->firstname3;
 		if($dc->activeRecord->firstname4) $temp .= '-'.$dc->activeRecord->firstname4;
 
-		$temp = StringUtil::generateAlias($temp);
+		if(version_compare(VERSION.BUILD, '4.4', '<'))
+		{
+			// Bei Contao < Version 4.4 ersetzte die Funktion noch die Umlaute
+			$temp = \StringUtil::generateAlias($temp);
+		}
+		else
+		{
+			// In 4.4 werden keine Umlaute ersetzt, ab 4.5 soll das im BE einstellbar sein. Aber ich ersetze sicherheitshalber selber...
+			$temp = str_replace($suchen, $ersetzen, \StringUtil::generateAlias($temp));
+		}
+
 		\Database::getInstance()->prepare("UPDATE tl_spielerregister SET alias=? WHERE id=?")
 		                        ->execute($temp, $dc->id);
 	}
@@ -881,7 +877,7 @@ class tl_spielerregister extends Backend
 			$fotolink = '<a href="' . $popuplink . '">Fotos bearbeiten</a>';
 		
 		$string = '
-<div class="long">
+<div class="widget long">
   <h3><label>Infobox</label></h3>
   <p>Spieler suchen in: <a href="' . $googlelink . '" target="_blank">Google</a> |
   <a href="' . $chess365link . '" target="_blank">365chess.com</a> |

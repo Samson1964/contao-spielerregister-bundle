@@ -141,6 +141,8 @@ class Jahrestage
 
 			// Newsletter an Admin schicken
 			$text = str_replace('##email##', 'webmaster@schachbund.de', $content);
+			$text = str_replace('"files/', '"https://www.schachbund.de/files/', $text); // Domain zu Dateilinks hinzufügen
+			$text = str_replace('"index.php/', '"https://www.schachbund.de/', $text); // Domain zu Weblinks hinzufügen
 			$objEmail = new \Email();
 			$objEmail->from = 'webmaster@schachbund.de';
 			$objEmail->fromName = 'DSB-Jahrestage';
@@ -156,6 +158,8 @@ class Jahrestage
 				while($objNewsletter->next())
 				{
 					$text = str_replace('##email##', $objNewsletter->email, $content);
+					$text = str_replace('"files/', '"https://www.schachbund.de/files/', $text); // Domain zu Dateilinks hinzufügen
+					$text = str_replace('"index.php/', '"https://www.schachbund.de/', $text); // Domain zu Weblinks hinzufügen
 					$objEmail = new \Email();
 					$objEmail->from = 'webmaster@schachbund.de';
 					$objEmail->fromName = 'DSB-Jahrestage';
