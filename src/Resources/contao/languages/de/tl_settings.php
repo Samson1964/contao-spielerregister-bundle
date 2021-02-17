@@ -1,4 +1,4 @@
-<?php if (!defined('TL_ROOT')) die('You cannot access this file directly!');
+﻿<?php if (!defined('TL_ROOT')) die('You cannot access this file directly!');
 
 /**
  * Contao Open Source CMS
@@ -20,3 +20,4 @@ $GLOBALS['TL_LANG']['tl_settings']['spielerregister_legend']                    
  * fields
  */
 $GLOBALS['TL_LANG']['tl_settings']['spielerregister_imageSize'] = array('Bildgröße', 'Größe der Vorschaubilder');
+$GLOBALS['TL_LANG']['tl_settings']['spielerregister_newsletter'] = array('Newsletter-ID', 'ID des Newsletterverteilers für den Jahrestage-Versand');

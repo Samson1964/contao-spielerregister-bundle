@@ -1,5 +1,11 @@
 # DSB-Spielerregister Changelog
 
+## Version 2.0.2 (2021-02-17)
+
+* Add: System-Einstellungen - Angabe der Newsletter-ID für Jahrestage-Newsletter
+* Add: Feld spielerregister_mailTime in tl_newsletter_recipients für die Speicherung des Newsletterversands
+* Add: Abhängigkeit contao/newsletter-bundle
+
 ## Version 2.0.1 (2020-12-17)
 
 * Fix: Umlaute beim Alias wurden nicht ersetzt

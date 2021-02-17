@@ -1,4 +1,4 @@
-<?php if (!defined('TL_ROOT')) die('You cannot access this file directly!');
+﻿<?php if (!defined('TL_ROOT')) die('You cannot access this file directly!');
 
 /**
  * Contao Open Source CMS
@@ -14,7 +14,7 @@
 /**
  * palettes
  */
-$GLOBALS['TL_DCA']['tl_settings']['palettes']['default'] .= ';{spielerregister_legend:hide},spielerregister_imageSize';
+$GLOBALS['TL_DCA']['tl_settings']['palettes']['default'] .= ';{spielerregister_legend:hide},spielerregister_imageSize,spielerregister_newsletter';
 
 /**
  * fields
@@ -32,4 +32,12 @@ $GLOBALS['TL_DCA']['tl_settings']['fields']['spielerregister_imageSize'] = array
 		return System::getContainer()->get('contao.image.image_sizes')->getOptionsForUser(BackendUser::getInstance());
 	},
 	'sql'                     => "varchar(255) NOT NULL default ''"
+); 
+
+$GLOBALS['TL_DCA']['tl_settings']['fields']['spielerregister_newsletter'] = array
+(
+	'label'                   => &$GLOBALS['TL_LANG']['tl_settings']['spielerregister_newsletter'],
+	'exclude'                 => true,
+	'inputType'               => 'text',
+	'sql'                     => "int(10) NOT NULL default ''"
 ); 
