@@ -27,7 +27,7 @@ use Contao\Controller;
  */
 define('TL_MODE', 'FE');
 define('TL_SCRIPT', 'bundles/contaospielerregister/jahrestage.php');
-require($_SERVER['DOCUMENT_ROOT'].'/../system/initialize.php'); 
+require($_SERVER['DOCUMENT_ROOT'].'/../system/initialize.php');
 
 /**
  * Class BannerClicks
@@ -41,123 +41,139 @@ class Jahrestage
 {
 	public function run()
 	{
-		// Zeitlichen Rahmen festlegen
-		$zieltext[0] = 'Heute';
-		$zieltext[1] = 'Morgen';
-		$zieltext[2] = 'In 1 Woche';
-		$zieltext[3] = 'In 2 Wochen';
-		$zielzeit[0] = date("md"); // Tag heute
-		$zielzeit[1] = date("md",strtotime("+1 day")); // Tag morgen
-		$zielzeit[2] = date("md",strtotime("+1 week")); // Tag in 1 Woche
-		$zielzeit[3] = date("md",strtotime("+2 week")); // Tag in 2 Wochen
-		$zieljahr[0] = date("Y"); // Jahr heute
-		$zieljahr[1] = date("Y",strtotime("+1 day")); // Jahr morgen
-		$zieljahr[2] = date("Y",strtotime("+1 week")); // Jahr in 1 Woche
-		$zieljahr[3] = date("Y",strtotime("+2 week")); // Jahr in 2 Wochen
-		// Ausgabearray initialisieren
-		$ausgabe = array('', '', '', '');
-		$debugausgabe = '';
+
+		if(!$GLOBALS['TL_CONFIG']['spielerregister_newsletter']) return; // Beenden, wenn kein Verteiler ausgewählt ist
 		
-		// Personen laden, bei denen demnächst Jahrestage anstehen
-		$objPlayers = \Database::getInstance()
-			->prepare("SELECT * FROM tl_spielerregister WHERE active = 1")
-			->execute();
-		if($objPlayers->numRows) 
+		$heute = mktime(0,0,0,date('m'),date('d'),date('Y')); // Heute 0:00:00 Uhr
+		$empfaenger = array(); // Hier werden später die E-Mail-Adressen der Empfänger gespeichert
+
+		// Max. 1 Newsletter-Empfänger laden, die heute noch keine E-Mail bekommen haben
+		$objNewsletter = \Database::getInstance()->prepare("SELECT * FROM tl_newsletter_recipients WHERE active = ? AND pid = ? AND spielerregister_mailTime < ?")
+		                                         ->limit(50)
+		                                         ->execute(1, $GLOBALS['TL_CONFIG']['spielerregister_newsletter'], $heute);
+		if($objNewsletter->numRows)
 		{
-			while($objPlayers->next())
+			while($objNewsletter->next())
 			{
-				$debugausgabe .= "<br>" . $objPlayers->surname1;
-				$geburtstag = substr($objPlayers->birthday,4,4);
-				($objPlayers->death) ? $todestag = substr($objPlayers->deathday,4,4) : $todestag = false;
-				$debugausgabe .= "<br>* " . $geburtstag;
-				for($x=0;$x<count($zielzeit);$x++)
+				$empfaenger[] = $objNewsletter->email;
+			}
+		}
+
+		// Mailversand vorbereiten, wenn Empfänger vorhanden sind
+		if($empfaenger)
+		{
+			// Zeitlichen Rahmen festlegen
+			$zieltext[0] = 'Heute';
+			$zieltext[1] = 'Morgen';
+			$zieltext[2] = 'In 1 Woche';
+			$zieltext[3] = 'In 2 Wochen';
+			$zielzeit[0] = date("md"); // Tag heute
+			$zielzeit[1] = date("md",strtotime("+1 day")); // Tag morgen
+			$zielzeit[2] = date("md",strtotime("+1 week")); // Tag in 1 Woche
+			$zielzeit[3] = date("md",strtotime("+2 week")); // Tag in 2 Wochen
+			$zieljahr[0] = date("Y"); // Jahr heute
+			$zieljahr[1] = date("Y",strtotime("+1 day")); // Jahr morgen
+			$zieljahr[2] = date("Y",strtotime("+1 week")); // Jahr in 1 Woche
+			$zieljahr[3] = date("Y",strtotime("+2 week")); // Jahr in 2 Wochen
+			// Ausgabearray initialisieren
+			$ausgabe = array('', '', '', '');
+			$debugausgabe = '';
+
+			// Personen laden, bei denen demnächst Jahrestage anstehen
+			$objPlayers = \Database::getInstance()
+				->prepare("SELECT * FROM tl_spielerregister WHERE active = 1")
+				->execute();
+			if($objPlayers->numRows)
+			{
+				while($objPlayers->next())
 				{
-					$todtext = '';
-					$debugausgabe .= "<br>- " . $zielzeit[$x];
-					// Bei Treffer, Spieler in Ausgabe schreiben
-					if($geburtstag == $zielzeit[$x])
+					$debugausgabe .= "<br>" . $objPlayers->surname1;
+					$geburtstag = substr($objPlayers->birthday,4,4);
+					($objPlayers->death) ? $todestag = substr($objPlayers->deathday,4,4) : $todestag = false;
+					$debugausgabe .= "<br>* " . $geburtstag;
+					for($x=0;$x<count($zielzeit);$x++)
 					{
-						// Wievielter Geburtstag?
-						$alter = $zieljahr[$x] - substr($objPlayers->birthday,0,4);
-						$tagestext = 'Geburtstag';
-					}
-					if($todestag == $zielzeit[$x])
-					{
-						// Wievielter Todestag?
-						$alter = $zieljahr[$x] - substr($objPlayers->deathday,0,4);
-						$tagestext = 'Todestag';
-					}
-					if($geburtstag == $zielzeit[$x] || $todestag == $zielzeit[$x])
-					{
-						// Alter zum Zeitpunkt des Todes berechnen
-						if($objPlayers->birthday && $objPlayers->deathday)
+						$todtext = '';
+						$debugausgabe .= "<br>- " . $zielzeit[$x];
+						// Bei Treffer, Spieler in Ausgabe schreiben
+						if($geburtstag == $zielzeit[$x])
 						{
-							$todesalter = $this->Alter($objPlayers->birthday, $objPlayers->deathday);
-							($todesalter) ? $todtext = ' (&dagger; '.$todesalter.')' : $todtext = '';
-							if(!$todtext && $objPlayers->death) $todtext = ' (&dagger; ?)';
+							// Wievielter Geburtstag?
+							$alter = $zieljahr[$x] - substr($objPlayers->birthday,0,4);
+							$tagestext = 'Geburtstag';
 						}
-						// Spielername ausgeben
-						$ausgabe[$x] .= '<p><b>' . $alter . '. ' . $tagestext . ' von <a href="https://www.schachbund.de/person/player/'.$objPlayers->id.'.html">' . $objPlayers->firstname1 . ' ' . $objPlayers->surname1 . '</a>'.$todtext.'</b></p>';
-						$ausgabe[$x] .= '<div style="padding-left:10px;">';
-						// Kurzinfo ausgeben
-						if($objPlayers->shortinfo) $ausgabe[$x] .= $objPlayers->shortinfo;
-						// Ehrungen ausgeben
-						if($objPlayers->honorpresident) $ausgabe[$x] .= '<i>- Ehrenpräsident des DSB ' . $objPlayers->honorpresident . '</i><br>';
-						if($objPlayers->honormember) $ausgabe[$x] .= '<i>- Ehrenmitglied des DSB ' . $objPlayers->honormember . '</i><br>';
-						if($objPlayers->honorgoldpin) $ausgabe[$x] .= '<i>- Goldene Ehrennadel des DSB ' . $objPlayers->honorgoldpin . '</i><br>';
-						if($objPlayers->honorsilverpin) $ausgabe[$x] .= '<i>- Silberne Ehrennadel des DSB ' . $objPlayers->honorsilverpin . '</i><br>';
-						if($objPlayers->honorgoldbadge) $ausgabe[$x] .= '<i>- Goldene Ehrenplakette des DSB ' . $objPlayers->honorgoldbadge . '</i><br>';
-						if($objPlayers->honorsilverbadge) $ausgabe[$x] .= '<i>- Silberne Ehrenplakette des DSB ' . $objPlayers->honorsilverbadge . '</i><br>';
-						if($objPlayers->honorletter) $ausgabe[$x] .= '<i>- Ehrenbrief des DSB ' . $objPlayers->honorletter . '</i><br>';
-						if($objPlayers->honorplate) $ausgabe[$x] .= '<i>- Ehrenteller des DSB ' . $objPlayers->honorplate . '</i><br>';
-						// Absatz abschließen
-						$ausgabe[$x] .= '</div>';
+						if($todestag == $zielzeit[$x])
+						{
+							// Wievielter Todestag?
+							$alter = $zieljahr[$x] - substr($objPlayers->deathday,0,4);
+							$tagestext = 'Todestag';
+						}
+						if($geburtstag == $zielzeit[$x] || $todestag == $zielzeit[$x])
+						{
+							// Alter zum Zeitpunkt des Todes berechnen
+							if($objPlayers->birthday && $objPlayers->deathday)
+							{
+								$todesalter = $this->Alter($objPlayers->birthday, $objPlayers->deathday);
+								($todesalter) ? $todtext = ' (&dagger; '.$todesalter.')' : $todtext = '';
+								if(!$todtext && $objPlayers->death) $todtext = ' (&dagger; ?)';
+							}
+							// Spielername ausgeben
+							$ausgabe[$x] .= '<p><b>' . $alter . '. ' . $tagestext . ' von <a href="https://www.schachbund.de/person/player/'.$objPlayers->id.'.html">' . $objPlayers->firstname1 . ' ' . $objPlayers->surname1 . '</a>'.$todtext.'</b></p>';
+							$ausgabe[$x] .= '<div style="padding-left:10px;">';
+							// Kurzinfo ausgeben
+							if($objPlayers->shortinfo) $ausgabe[$x] .= $objPlayers->shortinfo;
+							// Ehrungen ausgeben
+							if($objPlayers->honorpresident) $ausgabe[$x] .= '<i>- Ehrenpräsident des DSB ' . $objPlayers->honorpresident . '</i><br>';
+							if($objPlayers->honormember) $ausgabe[$x] .= '<i>- Ehrenmitglied des DSB ' . $objPlayers->honormember . '</i><br>';
+							if($objPlayers->honorgoldpin) $ausgabe[$x] .= '<i>- Goldene Ehrennadel des DSB ' . $objPlayers->honorgoldpin . '</i><br>';
+							if($objPlayers->honorsilverpin) $ausgabe[$x] .= '<i>- Silberne Ehrennadel des DSB ' . $objPlayers->honorsilverpin . '</i><br>';
+							if($objPlayers->honorgoldbadge) $ausgabe[$x] .= '<i>- Goldene Ehrenplakette des DSB ' . $objPlayers->honorgoldbadge . '</i><br>';
+							if($objPlayers->honorsilverbadge) $ausgabe[$x] .= '<i>- Silberne Ehrenplakette des DSB ' . $objPlayers->honorsilverbadge . '</i><br>';
+							if($objPlayers->honorletter) $ausgabe[$x] .= '<i>- Ehrenbrief des DSB ' . $objPlayers->honorletter . '</i><br>';
+							if($objPlayers->honorplate) $ausgabe[$x] .= '<i>- Ehrenteller des DSB ' . $objPlayers->honorplate . '</i><br>';
+							// Absatz abschließen
+							$ausgabe[$x] .= '</div>';
+						}
 					}
 				}
 			}
-		}
-		echo $debugausgabe;
-		$content = '';
-		for($x=0;$x<count($ausgabe);$x++)
-		{
-			if($ausgabe[$x])
+			echo $debugausgabe;
+			$content = '';
+			for($x=0;$x<count($ausgabe);$x++)
 			{
-				$tag = substr($zielzeit[$x],2,2) . '.' . substr($zielzeit[$x],0,2) . '.' . $zieljahr[$x];
-				$ausgabe[$x] = '<h2>' . $zieltext[$x] . ' (' . $tag .')</h2><p>' . $ausgabe[$x] . '</p>';
-				echo $ausgabe[$x];
-				$content .= $ausgabe[$x];
-			}
-		}
-		
-		if($content)
-		{
-			// Inserttags ersetzen und Inhalt einfügen
-			$content = \Controller::replaceInsertTags($content);
-			$content = str_replace('app.php','https://www.schachbund.de',$content);
-			$content = '<h1>Jahrestagsnewsletter des Deutschen Schachbundes</h1><p>Folgende Jahrestage stehen an:</p>' . $content;
-			$content .= '<p><i>DIESE E-MAIL WURDE AUTOMATISCH GENERIERT!</i></p><p>Wenn Sie Korrekturen oder Ergänzungen für uns haben, dann antworten Sie einfach auf diese E-Mail!</p>';
-			$content .= '<p><a href="https://www.schachbund.de/persoenlichkeiten.html">Nächste Jahrestage</a> (komplett mit Fotos) | <a href="https://www.schachbund.de/gedenktafel.html">Unsere Gedenktafel</a> (Sterbefälle letzte 15 Monate) | ';
-			$content .= '<a href="https://www.schachbund.de/persoenlichkeiten-newsletter-kuendigen.html?email=##email##">Newsletter kündigen</a></p>';
-
-			// Newsletter an Admin schicken
-			$text = str_replace('##email##', 'webmaster@schachbund.de', $content);
-			$text = str_replace('"files/', '"https://www.schachbund.de/files/', $text); // Domain zu Dateilinks hinzufügen
-			$text = str_replace('"index.php/', '"https://www.schachbund.de/', $text); // Domain zu Weblinks hinzufügen
-			$objEmail = new \Email();
-			$objEmail->from = 'webmaster@schachbund.de';
-			$objEmail->fromName = 'DSB-Jahrestage';
-			$objEmail->subject = '[DSB-Historyletter] Jahrestage Spielerregister';
-			$objEmail->html = $text;
-			$objEmail->sendTo(array('Frank Hoppe <webmaster@schachbund.de>')); 
-
-			// Newsletter-Empfänger laden und Mail versenden
-			$objNewsletter = \Database::getInstance()->prepare("SELECT email FROM tl_newsletter_recipients WHERE active = 1 AND pid = 8")
-			                                         ->execute();
-			if($objNewsletter->numRows)
-			{
-				while($objNewsletter->next())
+				if($ausgabe[$x])
 				{
-					$text = str_replace('##email##', $objNewsletter->email, $content);
+					$tag = substr($zielzeit[$x],2,2) . '.' . substr($zielzeit[$x],0,2) . '.' . $zieljahr[$x];
+					$ausgabe[$x] = '<h2>' . $zieltext[$x] . ' (' . $tag .')</h2><p>' . $ausgabe[$x] . '</p>';
+					echo $ausgabe[$x];
+					$content .= $ausgabe[$x];
+				}
+			}
+
+			if($content)
+			{
+				// Inserttags ersetzen und Inhalt einfügen
+				$content = \Controller::replaceInsertTags($content);
+				$content = str_replace('app.php','https://www.schachbund.de',$content);
+				$content = '<h1>Jahrestagsnewsletter des Deutschen Schachbundes</h1><p>Folgende Jahrestage stehen an:</p>' . $content;
+				$content .= '<p><i>DIESE E-MAIL WURDE AUTOMATISCH GENERIERT!</i></p><p>Wenn Sie Korrekturen oder Ergänzungen für uns haben, dann antworten Sie einfach auf diese E-Mail!</p>';
+				$content .= '<p><a href="https://www.schachbund.de/persoenlichkeiten.html">Nächste Jahrestage</a> (komplett mit Fotos) | <a href="https://www.schachbund.de/gedenktafel.html">Unsere Gedenktafel</a> (Sterbefälle letzte 15 Monate) | ';
+				$content .= '<a href="https://www.schachbund.de/persoenlichkeiten-newsletter-kuendigen.html?email=##email##">Newsletter kündigen</a></p>';
+
+				// Newsletter an Admin schicken
+				$text = str_replace('##email##', 'webmaster@schachbund.de', $content);
+				$text = str_replace('"files/', '"https://www.schachbund.de/files/', $text); // Domain zu Dateilinks hinzufügen
+				$text = str_replace('"index.php/', '"https://www.schachbund.de/', $text); // Domain zu Weblinks hinzufügen
+				$objEmail = new \Email();
+				$objEmail->from = 'webmaster@schachbund.de';
+				$objEmail->fromName = 'DSB-Jahrestage';
+				$objEmail->subject = '[DSB-Historyletter] Jahrestage Spielerregister';
+				$objEmail->html = $text;
+				$objEmail->sendTo(array('Frank Hoppe <webmaster@schachbund.de>'));
+
+				foreach($empfaenger as $adresse)
+				{
+					$text = str_replace('##email##', $adresse, $content);
 					$text = str_replace('"files/', '"https://www.schachbund.de/files/', $text); // Domain zu Dateilinks hinzufügen
 					$text = str_replace('"index.php/', '"https://www.schachbund.de/', $text); // Domain zu Weblinks hinzufügen
 					$objEmail = new \Email();
@@ -165,7 +181,12 @@ class Jahrestage
 					$objEmail->fromName = 'DSB-Jahrestage';
 					$objEmail->subject = '[DSB-Historyletter] Jahrestage Spielerregister';
 					$objEmail->html = $text;
-					$objEmail->sendTo(array($objNewsletter->email)); 
+					$objEmail->sendTo(array($adresse));
+					// Versandzeit in Datenbank eintragen
+					$set = array('spielerregister_mailTime' => time());
+					\Database::getInstance()->prepare("UPDATE tl_newsletter_recipients %s WHERE pid=? AND email=?")
+					                        ->set($set)
+					                        ->execute($GLOBALS['TL_CONFIG']['spielerregister_newsletter'], $adresse);
 				}
 			}
 		}
@@ -177,7 +198,7 @@ class Jahrestage
 	 * @param ende = Endedatum als JJJJMMTT oder TT.MM.JJJJ
 	 * @return int
 	 */
-	protected function Alter($start, $ende) 
+	protected function Alter($start, $ende)
 	{
 		// Startdatum umwandeln
 		$laenge = strlen($start);
@@ -224,7 +245,7 @@ class Jahrestage
 		if($month > $cur_month) return $calc_year - 1;
 		elseif($month == $cur_month && $day > $cur_day) return $calc_year - 1;
 		else return $calc_year;
-	
+
 	}
 }
 

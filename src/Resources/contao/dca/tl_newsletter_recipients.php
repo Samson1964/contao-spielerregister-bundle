@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 // Palette manipulieren
 $debug = print_r($GLOBALS['TL_DCA']['tl_newsletter_recipients']['palettes']['default'], true);
@@ -19,7 +19,9 @@ $GLOBALS['TL_DCA']['tl_newsletter_recipients']['fields']['spielerregister_mailTi
 	'inputType'               => 'text',
 	'eval'                    => array
 	(
-		'tl_class'            => 'w50'
+		'rgxp'                => 'datim',
+		'datepicker'          => true,
+		'tl_class'            => 'w50 wizard'
 	),
 	'sql'                     => "int(10) unsigned NOT NULL default '0'"
 );

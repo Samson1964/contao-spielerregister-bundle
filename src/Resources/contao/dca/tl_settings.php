@@ -1,11 +1,11 @@
-ï»¿<?php if (!defined('TL_ROOT')) die('You cannot access this file directly!');
+<?php
 
 /**
  * Contao Open Source CMS
  *
  * Copyright (C) 2005-2013 Leo Feyer
  *
- * @package   fen
+ * @package   contao-spielerregister-bundle
  * @author    Frank Hoppe
  * @license   GNU/LGPL
  * @copyright Frank Hoppe 2013
@@ -26,18 +26,54 @@ $GLOBALS['TL_DCA']['tl_settings']['fields']['spielerregister_imageSize'] = array
 	'exclude'                 => true,
 	'inputType'               => 'imageSize',
 	'reference'               => &$GLOBALS['TL_LANG']['MSC'],
-	'eval'                    => array('rgxp'=>'natural', 'includeBlankOption'=>true, 'nospace'=>true, 'helpwizard'=>true, 'tl_class'=>'w50'),
-	'options_callback' => static function ()
+	'eval'                    => array
+	(
+		'rgxp'                => 'natural',
+		'includeBlankOption'  => true,
+		'nospace'             => true,
+		'helpwizard'          => true,
+		'tl_class'            => 'w50'
+	),
+	'options_callback'        => static function ()
 	{
 		return System::getContainer()->get('contao.image.image_sizes')->getOptionsForUser(BackendUser::getInstance());
 	},
 	'sql'                     => "varchar(255) NOT NULL default ''"
-); 
+);
 
 $GLOBALS['TL_DCA']['tl_settings']['fields']['spielerregister_newsletter'] = array
 (
 	'label'                   => &$GLOBALS['TL_LANG']['tl_settings']['spielerregister_newsletter'],
 	'exclude'                 => true,
-	'inputType'               => 'text',
+	'inputType'               => 'select',
+	'options_callback'        => array('tl_settings_spielerregister', 'Newsletterverteiler'),
+	'eval'                    => array
+	(
+		'includeBlankOption'  => true,
+		'tl_class'            => 'w50'
+	),
 	'sql'                     => "int(10) NOT NULL default ''"
-); 
+);
+
+class tl_settings_spielerregister
+{
+	/**
+	 * options_callback: Ermöglicht das Befüllen eines Drop-Down-Menüs oder einer Checkbox-Liste mittels einer individuellen Funktion.
+	 * @param  $dc
+	 * @return array
+	 */
+	public function Newsletterverteiler(DataContainer $dc)
+	{
+		$optionen = array();
+		$objNewsletter = \Database::getInstance()->prepare("SELECT * FROM tl_newsletter_channel")
+		                                         ->execute();
+		if($objNewsletter->numRows)
+		{
+			while($objNewsletter->next())
+			{
+				$optionen[$objNewsletter->id] = $objNewsletter->title;
+			}
+		}
+		return $optionen;
+	}
+}

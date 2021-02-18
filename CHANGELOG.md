@@ -1,5 +1,10 @@
 # DSB-Spielerregister Changelog
 
+## Version 2.1.0 (2021-02-18)
+
+* Add: Max. 30 Newsletter werden versendet an Empfänger die am aktuellen Tag noch nichts bekommen haben
+* Add: Newsletter-Verteiler-Auswahl in System-Einstellungen (statt Eingabe der ID)
+
 ## Version 2.0.2 (2021-02-17)
 
 * Add: System-Einstellungen - Angabe der Newsletter-ID für Jahrestage-Newsletter

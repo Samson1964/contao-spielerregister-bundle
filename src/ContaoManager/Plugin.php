@@ -17,7 +17,7 @@ class Plugin implements BundlePluginInterface
 	{
 		return [
 			BundleConfig::create(ContaoSpielerregisterBundle::class)
-				->setLoadAfter([ContaoCoreBundle::class, ContaoNewsletterBundle::class]),
+				->setLoadAfter([ContaoCoreBundle::class, \Contao\NewsletterBundle\ContaoNewsletterBundle::class]),
 		];
 	}
 }

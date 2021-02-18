@@ -20,4 +20,4 @@ $GLOBALS['TL_LANG']['tl_settings']['spielerregister_legend']                    
  * fields
  */
 $GLOBALS['TL_LANG']['tl_settings']['spielerregister_imageSize'] = array('Bildgröße', 'Größe der Vorschaubilder');
-$GLOBALS['TL_LANG']['tl_settings']['spielerregister_newsletter'] = array('Newsletter-ID', 'ID des Newsletterverteilers für den Jahrestage-Versand');
+$GLOBALS['TL_LANG']['tl_settings']['spielerregister_newsletter'] = array('Newsletter-Verteiler', 'Newsletter-Verteiler für den Jahrestage-Versand auswählen');
