@@ -58,7 +58,7 @@ $GLOBALS['TL_DCA']['tl_settings']['fields']['spielerregister_newsletter'] = arra
 class tl_settings_spielerregister
 {
 	/**
-	 * options_callback: Ermöglicht das Befüllen eines Drop-Down-Menüs oder einer Checkbox-Liste mittels einer individuellen Funktion.
+	 * options_callback: ErmÃ¶glicht das BefÃ¼llen eines Drop-Down-MenÃ¼s oder einer Checkbox-Liste mittels einer individuellen Funktion.
 	 * @param  $dc
 	 * @return array
 	 */

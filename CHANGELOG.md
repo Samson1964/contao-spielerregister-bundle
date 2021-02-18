@@ -1,5 +1,9 @@
 # DSB-Spielerregister Changelog
 
+## Version 2.1.1 (2021-02-18)
+
+* Fix: UltraEdit speichert UTF8 mit BOM fälschlicherweise
+
 ## Version 2.1.0 (2021-02-18)
 
 * Add: Max. 30 Newsletter werden versendet an Empfänger die am aktuellen Tag noch nichts bekommen haben
