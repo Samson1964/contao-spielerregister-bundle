@@ -25,7 +25,7 @@ $GLOBALS['FE_MOD']['spielerregister'] = array
 );
 
 /**
- * Backend-Module des Spielerregisters in das Backend-Menü "Inhalte" an Position 1 einfügen
+ * Backend-Module des Spielerregisters in das Backend-MenÃ¼ "Inhalte" an Position 1 einfÃ¼gen
  */
 array_insert($GLOBALS['BE_MOD']['content'], 1, array
 (
@@ -38,7 +38,14 @@ array_insert($GLOBALS['BE_MOD']['content'], 1, array
 ));
 
 /**
- * Inserttag für Registerersetzung in den Hooks anmelden
+ * Inserttag fÃ¼r Registerersetzung in den Hooks anmelden
  */
 
 $GLOBALS['TL_HOOKS']['replaceInsertTags'][] = array('Schachbulle\ContaoSpielerregisterBundle\Klassen\Spielerregister','ReplacePlayer');
+
+/**
+ * Voreinstellungen
+ */
+
+$GLOBALS['TL_CONFIG']['spielerregister_zyklus'] = 30;
+$GLOBALS['TL_CONFIG']['spielerregister_wartezeit'] = 0;

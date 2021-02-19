@@ -21,3 +21,5 @@ $GLOBALS['TL_LANG']['tl_settings']['spielerregister_legend']                    
  */
 $GLOBALS['TL_LANG']['tl_settings']['spielerregister_imageSize'] = array('Bildgröße', 'Größe der Vorschaubilder');
 $GLOBALS['TL_LANG']['tl_settings']['spielerregister_newsletter'] = array('Newsletter-Verteiler', 'Newsletter-Verteiler für den Jahrestage-Versand auswählen');
+$GLOBALS['TL_LANG']['tl_settings']['spielerregister_zyklus'] = array('Anzahl Mails', 'Anzahl der E-Mails, die je Zyklus verschickt werden. 0 = kein Zyklus, alle E-Mails in einem Durchgang.');
+$GLOBALS['TL_LANG']['tl_settings']['spielerregister_wartezeit'] = array('Wartezeit', 'Wartezeit in Sekunden nach jedem Zyklus. 0 = keine Wartezeit, nur ein Zyklus.');

@@ -14,7 +14,8 @@
 /**
  * palettes
  */
-$GLOBALS['TL_DCA']['tl_settings']['palettes']['default'] .= ';{spielerregister_legend:hide},spielerregister_imageSize,spielerregister_newsletter';
+
+$GLOBALS['TL_DCA']['tl_settings']['palettes']['default'] .= ';{spielerregister_legend:hide},spielerregister_imageSize,spielerregister_newsletter,spielerregister_zyklus,spielerregister_wartezeit';
 
 /**
  * fields
@@ -55,6 +56,34 @@ $GLOBALS['TL_DCA']['tl_settings']['fields']['spielerregister_newsletter'] = arra
 	'sql'                     => "int(10) NOT NULL default ''"
 );
 
+$GLOBALS['TL_DCA']['tl_settings']['fields']['spielerregister_zyklus'] = array
+(
+	'label'                   => &$GLOBALS['TL_LANG']['tl_settings']['spielerregister_zyklus'],
+	'exclude'                 => true,
+	'inputType'               => 'text',
+	'eval'                    => array
+	(
+		'maxlength'           => 3,
+		'rgxp'                => 'digit',
+		'tl_class'            => 'w50'
+	),
+	'sql'                     => "int(3) NOT NULL default '30'"
+);
+
+$GLOBALS['TL_DCA']['tl_settings']['fields']['spielerregister_wartezeit'] = array
+(
+	'label'                   => &$GLOBALS['TL_LANG']['tl_settings']['spielerregister_wartezeit'],
+	'exclude'                 => true,
+	'inputType'               => 'text',
+	'eval'                    => array
+	(
+		'maxlength'           => 2,
+		'rgxp'                => 'digit',
+		'tl_class'            => 'w50'
+	),
+	'sql'                     => "int(2) NOT NULL default '0'"
+);
+
 class tl_settings_spielerregister
 {
 	/**
@@ -65,7 +94,7 @@ class tl_settings_spielerregister
 	public function Newsletterverteiler(DataContainer $dc)
 	{
 		$optionen = array();
-		$objNewsletter = \Database::getInstance()->prepare("SELECT * FROM tl_newsletter_channel")
+		$objNewsletter = \Database::getInstance()->prepare("SELECT * FROM tl_newsletter_channel ORDER by title ASC")
 		                                         ->execute();
 		if($objNewsletter->numRows)
 		{

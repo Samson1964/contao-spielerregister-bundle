@@ -1,5 +1,11 @@
 # DSB-Spielerregister Changelog
 
+## Version 2.2.0 (2021-02-19)
+
+* Add: Maximale Anzahl der E-Mails die pro Durchgang von jahrestage.php verschickt werden -> System-Einstellungen
+* Change: Auswahl des Newsletter-Verteilers ist jetzt alphabetisch sortiert
+* Add: Feld spielerregister_mailTime nur anzeigen, wenn richtiger Verteiler angezeigt wird
+
 ## Version 2.1.1 (2021-02-18)
 
 * Fix: UltraEdit speichert UTF8 mit BOM fälschlicherweise

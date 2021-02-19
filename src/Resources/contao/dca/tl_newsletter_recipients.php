@@ -1,10 +1,22 @@
 <?php
 
-// Palette manipulieren
-$debug = print_r($GLOBALS['TL_DCA']['tl_newsletter_recipients']['palettes']['default'], true);
+// Datenbankabfrage, wenn Tabelle tl_newsletter_recipients aktiv ist und eine ID übergeben wurde
+// Leider wird das trotzdem noch im Info-Popup angezeigt
+if(\Input::get('table') == 'tl_newsletter_recipients' && \Input::get('id'))
+{
+	// ID des Newsletter-Verteilers laden
+	$objNewsletter = \Database::getInstance()->prepare("SELECT pid FROM tl_newsletter_recipients WHERE id = ?")
+	                                         ->execute(\Input::get('id'));
 
-log_message($debug,'spielerregister.log');
-$GLOBALS['TL_DCA']['tl_newsletter_recipients']['palettes']['default'] = str_replace('active', 'active,spielerregister_mailTime', $GLOBALS['TL_DCA']['tl_newsletter_recipients']['palettes']['default']);
+	if($objNewsletter->numRows)
+	{
+		if($objNewsletter->pid == $GLOBALS['TL_CONFIG']['spielerregister_newsletter'])
+		{
+			// Palette manipulieren
+			$GLOBALS['TL_DCA']['tl_newsletter_recipients']['palettes']['default'] = str_replace('active', 'active,spielerregister_mailTime', $GLOBALS['TL_DCA']['tl_newsletter_recipients']['palettes']['default']);
+		}
+	}
+}
 
 /**
  * Neue Felder in tl_newsletter_recipients
