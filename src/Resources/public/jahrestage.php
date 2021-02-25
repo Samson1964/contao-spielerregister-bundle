@@ -173,18 +173,20 @@ class Jahrestage
 					$content .= '<a href="https://www.schachbund.de/persoenlichkeiten-newsletter-kuendigen.html?email=##email##">Newsletter kündigen</a></p>';
 
 					// Newsletter an Admin schicken
-					$text = str_replace('##email##', 'webmaster@schachbund.de', $content);
-					$text = str_replace('"files/', '"https://www.schachbund.de/files/', $text); // Domain zu Dateilinks hinzufügen
-					$text = str_replace('"index.php/', '"https://www.schachbund.de/', $text); // Domain zu Weblinks hinzufügen
-					$objEmail = new \Email();
-					$objEmail->from = 'webmaster@schachbund.de';
-					$objEmail->fromName = 'DSB-Jahrestage';
-					$objEmail->subject = '[DSB-Historyletter] Jahrestage Spielerregister';
-					$objEmail->html = $text;
-					$objEmail->sendTo(array('Frank Hoppe <webmaster@schachbund.de>'));
+					//$text = str_replace('##email##', 'webmaster@schachbund.de', $content);
+					//$text = str_replace('"files/', '"https://www.schachbund.de/files/', $text); // Domain zu Dateilinks hinzufügen
+					//$text = str_replace('"index.php/', '"https://www.schachbund.de/', $text); // Domain zu Weblinks hinzufügen
+					//$objEmail = new \Email();
+					//$objEmail->from = 'webmaster@schachbund.de';
+					//$objEmail->fromName = 'DSB-Jahrestage';
+					//$objEmail->subject = '[DSB-Historyletter] Jahrestage Spielerregister';
+					//$objEmail->html = $text;
+					//$objEmail->sendTo(array('Frank Hoppe <webmaster@schachbund.de>'));
 
+					$anzahl = 0;
 					foreach($empfaenger as $adresse)
 					{
+						$anzahl++;
 						$text = str_replace('##email##', $adresse, $content);
 						$text = str_replace('"files/', '"https://www.schachbund.de/files/', $text); // Domain zu Dateilinks hinzufügen
 						$text = str_replace('"index.php/', '"https://www.schachbund.de/', $text); // Domain zu Weblinks hinzufügen
@@ -200,6 +202,8 @@ class Jahrestage
 						                        ->set($set)
 						                        ->execute($GLOBALS['TL_CONFIG']['spielerregister_newsletter'], $adresse);
 					}
+					// Logdatei schreiben
+					\System::log('Jahrestage-Newsletter an '.$anzahl.' Empfänger versendet', __CLASS__.'::'.__FUNCTION__, TL_NEWSLETTER);
 				}
 			}
 			else

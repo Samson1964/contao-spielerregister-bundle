@@ -1,5 +1,11 @@
 # DSB-Spielerregister Changelog
 
+## Version 2.2.1 (2021-02-25)
+
+* Delete: public/ehrungen.php (da schon länger ausgelagert in das contao-tributes-bundle)
+* Change: public/jahrestage.php - Newsletter an Admin entfernt
+* Add: public/jahrestage - Anzahl verschickter Newsletter in tl_log schreiben
+
 ## Version 2.2.0 (2021-02-19)
 
 * Add: Maximale Anzahl der E-Mails die pro Durchgang von jahrestage.php verschickt werden -> System-Einstellungen
