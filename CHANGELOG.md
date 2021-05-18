@@ -1,5 +1,9 @@
 # DSB-Spielerregister Changelog
 
+## Version 2.3.0 (2021-05-18)
+
+* Add: Inserttag spielerregister_url
+
 ## Version 2.2.1 (2021-02-25)
 
 * Delete: public/ehrungen.php (da schon länger ausgelagert in das contao-tributes-bundle)

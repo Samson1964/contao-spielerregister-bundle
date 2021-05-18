@@ -42,6 +42,7 @@ array_insert($GLOBALS['BE_MOD']['content'], 1, array
  */
 
 $GLOBALS['TL_HOOKS']['replaceInsertTags'][] = array('Schachbulle\ContaoSpielerregisterBundle\Klassen\Spielerregister','ReplacePlayer');
+$GLOBALS['TL_HOOKS']['replaceInsertTags'][] = array('Schachbulle\ContaoSpielerregisterBundle\Classes\Tags','Register');
 
 /**
  * Voreinstellungen
