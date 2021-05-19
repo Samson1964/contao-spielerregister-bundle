@@ -1,5 +1,13 @@
 # DSB-Spielerregister Changelog
 
+## Version 2.3.1 (2021-05-19)
+
+* Add: TODO.md
+* Add: Detailseite in tl_settings
+* Change: Classes/Tags.php greift jetzt auf die Detailseite aus den Einstellungen zurück
+* Add: JQuery-UI-Skript
+* Add: Template spielerregister_modalbox für Ansicht der Spielerdetails in einer Modalbox/Lightbox
+
 ## Version 2.3.0 (2021-05-18)
 
 * Add: Inserttag spielerregister_url

@@ -145,4 +145,27 @@ class Helper
 		
 	}
 
+	/**
+	 * Gibt einen formatierten String für die Lebensdaten zurück
+	 * @return string
+	 */
+	static function getLebensdaten($geburtstag, $geburtsort, $gestorben, $sterbetag, $sterbeort)
+	{
+
+		$return = '';
+		if($geburtstag) $return .= '* '.self::getDate($geburtstag);
+		if($geburtsort) $return .= ' '.$geburtsort;
+		if($gestorben)
+		{
+			$return .= '; &dagger;';
+			if($sterbetag)
+			{
+				$return .= ' '.self::getDate($sterbetag);
+				if($sterbeort) $return .= ' '.$sterbeort;
+			}
+		}
+
+		return $return;
+	}
+
 }

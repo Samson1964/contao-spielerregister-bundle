@@ -1,0 +1,32 @@
+<?php
+	$GLOBALS['TL_CSS'][] = 'bundles/contaospielerregister/js/jquery-ui.min.css';
+	$GLOBALS['TL_JAVASCRIPT'][] = 'bundles/contaospielerregister/js/jquery-ui.min.js';
+?>
+
+<script>
+$(function() {
+	$("#dialog_<?= $this->contentid ?>" ).dialog({
+		width: 500,
+		autoOpen: false,
+		show: {
+			effect: "blind",
+			duration: 500
+		},
+		hide: {
+			effect: "explode",
+			duration: 500
+		}
+	});
+	
+	$("#opener_<?= $this->contentid ?>").on("click", function() {
+		$(".spielerregister_dialog" ).dialog("close");
+		$("#dialog_<?= $this->contentid ?>").dialog("open");
+	});
+} );
+</script>
+
+<div class="spielerregister_dialog" id="dialog_<?= $this->contentid ?>" title="<?= $this->player_name ?>">
+	<p class="lebensdaten"><?= $this->player_leben ?></p><?= $this->player_info ?>
+</div>
+
+<span id="opener_<?= $this->contentid ?>" class="modalbox" style="cursor: pointer; outline: none;"><?= $this->linkname ?></span>

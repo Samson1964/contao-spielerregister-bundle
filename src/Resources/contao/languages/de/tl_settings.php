@@ -19,6 +19,7 @@ $GLOBALS['TL_LANG']['tl_settings']['spielerregister_legend']                    
 /**
  * fields
  */
+$GLOBALS['TL_LANG']['tl_settings']['spielerregister_detailseite'] = array('Detailseite', 'Detailseite auf der das Modul für die Ausgabe von Personen eingebunden ist.');
 $GLOBALS['TL_LANG']['tl_settings']['spielerregister_imageSize'] = array('Bildgröße', 'Größe der Vorschaubilder');
 $GLOBALS['TL_LANG']['tl_settings']['spielerregister_newsletter'] = array('Newsletter-Verteiler', 'Newsletter-Verteiler für den Jahrestage-Versand auswählen');
 $GLOBALS['TL_LANG']['tl_settings']['spielerregister_zyklus'] = array('Anzahl Mails', 'Anzahl der E-Mails, die je Zyklus verschickt werden. 0 = kein Zyklus, alle E-Mails in einem Durchgang.');

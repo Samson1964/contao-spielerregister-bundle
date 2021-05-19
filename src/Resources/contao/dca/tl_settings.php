@@ -15,11 +15,31 @@
  * palettes
  */
 
-$GLOBALS['TL_DCA']['tl_settings']['palettes']['default'] .= ';{spielerregister_legend:hide},spielerregister_imageSize,spielerregister_newsletter,spielerregister_zyklus,spielerregister_wartezeit';
+$GLOBALS['TL_DCA']['tl_settings']['palettes']['default'] .= ';{spielerregister_legend:hide},spielerregister_detailseite,spielerregister_imageSize,spielerregister_newsletter,spielerregister_zyklus,spielerregister_wartezeit';
 
 /**
  * fields
  */
+// Seite für das Spieler-Modul
+$GLOBALS['TL_DCA']['tl_settings']['fields']['spielerregister_detailseite'] = array
+(
+	'label'                   => &$GLOBALS['TL_LANG']['tl_settings']['spielerregister_detailseite'],
+	'exclude'                 => true,
+	'inputType'               => 'pageTree',
+	'foreignKey'              => 'tl_page.title',
+	'eval'                    => array
+	(
+		'mandatory'           => true,
+		'fieldType'           => 'radio',
+		'tl_class'            => 'w50 clr'
+	),
+	'sql'                     => "int(10) unsigned NOT NULL default 0",
+	'relation'                => array
+	(
+		'type'                => 'hasOne',
+		'load'                => 'lazy'
+	)
+); 
 
 $GLOBALS['TL_DCA']['tl_settings']['fields']['spielerregister_imageSize'] = array
 (
@@ -33,7 +53,7 @@ $GLOBALS['TL_DCA']['tl_settings']['fields']['spielerregister_imageSize'] = array
 		'includeBlankOption'  => true,
 		'nospace'             => true,
 		'helpwizard'          => true,
-		'tl_class'            => 'w50'
+		'tl_class'            => 'w50 clr'
 	),
 	'options_callback'        => static function ()
 	{
