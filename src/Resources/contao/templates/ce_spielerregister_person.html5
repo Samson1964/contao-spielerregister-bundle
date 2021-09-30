@@ -1,0 +1,39 @@
+<?php $this->extend('block_searchable'); ?>
+
+<?php $this->block('content'); ?>
+
+	<?php if(!$this->addBefore): ?>
+		<p class="lebensdaten">
+			<?= $this->lebensdaten ?>
+		</p>
+		<?php if ($this->kurzinfo): ?>
+			<p class="kurzinfo">
+				<?= $this->kurzinfo ?>
+			</p>
+		<?php endif; ?>
+		<?= $this->text ?>
+	<?php endif; ?>
+	
+	<?php if($this->addImage): ?>
+		<?php $this->insert('image', $this->arrData); ?>
+	<?php endif; ?>
+	
+	<?php if($this->addBefore): ?>
+		<p class="lebensdaten">
+			<?= $this->lebensdaten ?>
+		</p>
+		<?php if ($this->kurzinfo): ?>
+			<p class="kurzinfo">
+				<?= $this->kurzinfo ?>
+			</p>
+		<?php endif; ?>
+		<?= $this->text ?>
+	<?php endif; ?>
+
+	<?php if ($this->langinfo): ?>
+		<p class="langinfo">
+			<?= $this->langinfo ?>
+		</p>
+	<?php endif; ?>
+
+<?php $this->endblock(); ?>

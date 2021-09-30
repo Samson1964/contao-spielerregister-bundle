@@ -139,7 +139,7 @@ $GLOBALS['TL_DCA']['tl_spielerregister'] = array
 	'palettes' => array
 	(
 		'__selector__'                => array('death'),
-		'default'                     => 'infobox;{namen_legend},surname1,firstname1,title,alias;{namen2_legend:hide},surname2,firstname2,surname3,firstname3,surname4,firstname4;{live_legend},birthday,birthplace,birthday_alt,death;{photos_legend:hide},multiSRC;{info_legend:hide},shortinfo,longinfo;{link_legend:hide},wikipedia,fide_id,dewis_id,chessgames_id,chess365_id,chess_id,homepage;{star_legend},importance;{fide_legend},gm_title,gm_date,im_title,im_date,wgm_title,wgm_date,wim_title,wim_date;{dsb_legend},honorpresident,honormember,honorgoldpin,honorsilverpin,honorgoldbadge,honorsilverbadge,honorletter,honorplate,honormedal;{intern_legend:hide},intern;{active_legend},nohighlighting,active'
+		'default'                     => 'infobox;{namen_legend},surname1,firstname1,title,alias;{namen2_legend:hide},surname2,firstname2,surname3,firstname3,surname4,firstname4;{live_legend},birthday,birthplace,birthday_alt,death,hideLifedata;{photos_legend:hide},multiSRC;{info_legend:hide},shortinfo,longinfo;{link_legend:hide},wikipedia,fide_id,dewis_id,chessgames_id,chess365_id,chess_id,homepage;{star_legend},importance;{fide_legend},gm_title,gm_date,im_title,im_date,wgm_title,wgm_date,wim_title,wim_date;{dsb_legend},honorpresident,honormember,honorgoldpin,honorsilverpin,honorgoldbadge,honorsilverbadge,honorletter,honorplate,honormedal;{intern_legend:hide},intern;{active_legend},nohighlighting,active'
 	),
 
 	// Subpalettes
@@ -382,6 +382,14 @@ $GLOBALS['TL_DCA']['tl_spielerregister'] = array
 			'inputType'               => 'checkbox',
 			'filter'                  => true,
 			'eval'                    => array('submitOnChange'=>true, 'tl_class'=>'clr'),
+			'sql'                     => "char(1) NOT NULL default ''"
+		),
+		'hideLifedata' => array
+		(
+			'label'                   => &$GLOBALS['TL_LANG']['tl_spielerregister']['hideLifedata'],
+			'inputType'               => 'checkbox',
+			'filter'                  => true,
+			'eval'                    => array('boolean'=>true, 'tl_class'=>'clr'),
 			'sql'                     => "char(1) NOT NULL default ''"
 		),
 		'multiSRC' => array

@@ -1,5 +1,10 @@
 # DSB-Spielerregister Changelog
 
+## Version 2.4.0 (2021-09-30)
+
+* Add: Option Lebensdaten im Frontend ausblenden
+* Add: ContentElements/Person.php, um eine Person aus dem Spielerregister auszugeben
+
 ## Version 2.3.1 (2021-05-19)
 
 * Add: TODO.md

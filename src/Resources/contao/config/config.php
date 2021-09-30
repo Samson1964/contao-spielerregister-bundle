@@ -38,6 +38,12 @@ array_insert($GLOBALS['BE_MOD']['content'], 1, array
 ));
 
 /**
+ * Inhaltselemente
+ */
+ 
+$GLOBALS['TL_CTE']['includes']['spielerregister_person'] = 'Schachbulle\ContaoSpielerregisterBundle\ContentElements\Person';
+
+/**
  * Inserttag für Registerersetzung in den Hooks anmelden
  */
 
@@ -50,3 +56,4 @@ $GLOBALS['TL_HOOKS']['replaceInsertTags'][] = array('Schachbulle\ContaoSpielerre
 
 $GLOBALS['TL_CONFIG']['spielerregister_zyklus'] = 30;
 $GLOBALS['TL_CONFIG']['spielerregister_wartezeit'] = 0;
+

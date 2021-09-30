@@ -126,17 +126,17 @@ class PlayerDetail extends \Module
 			($objRegister->firstname1) ? $this->Template->name = $objRegister->firstname1 . ' ' . $objRegister->surname1 : $this->Template->name = $objRegister->surname1;
 			// Seitentitel modifizieren
 			$objPage->pageTitle = $this->Template->name . ' | ' . $objPage->pageTitle;
-			$this->Template->geburtstag = $this->DatumToString($objRegister->birthday);
-			$this->Template->verstorben = $objRegister->death;
-			$this->Template->todestag = $this->DatumToString($objRegister->deathday);
+			$this->Template->geburtstag = $objRegister->hideLifedata ? '' : $this->DatumToString($objRegister->birthday);
+			$this->Template->verstorben = $objRegister->hideLifedata ? '' : $objRegister->death;
+			$this->Template->todestag = $objRegister->hideLifedata ? '' : $this->DatumToString($objRegister->deathday);
 			// Lebensdaten für Ausgabe aufbereiten
-			($this->Template->geburtstag) ? $temp = '* ' . $this->Template->geburtstag : $temp = '';
-			if($objRegister->death)
+			($this->Template->geburtstag && !$objRegister->hideLifedata) ? $temp = '* ' . $this->Template->geburtstag : $temp = '';
+			if($objRegister->death && !$objRegister->hideLifedata)
 			{
 				($temp) ? $temp .= '; &dagger;' : $temp = '&dagger;';
 				($this->Template->todestag) ? $temp .= ' ' . $this->Template->todestag : $temp .= ' unbekannt';
 			}
-			$this->Template->lebensdaten = $temp;
+			$this->Template->lebensdaten = $objRegister->hideLifedata ? '' : $temp;
 			$this->Template->bedeutung = $objRegister->importance;
 			$this->Template->wikipedia = $objRegister->wikipedia;
 			$this->Template->kurzinfo = $objRegister->shortinfo;

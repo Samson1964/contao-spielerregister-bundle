@@ -24,6 +24,7 @@ $GLOBALS['TL_LANG']['tl_spielerregister']['death'] = array('Verstorben', 'Die Pe
 $GLOBALS['TL_LANG']['tl_spielerregister']['deathday'] = array('Todestag', 'Format TT.MM.JJJJ, MM.JJJJ oder JJJJ');
 $GLOBALS['TL_LANG']['tl_spielerregister']['deathday_alt'] = array('Abweichender Todestag', 'Format TT.MM.JJJJ, MM.JJJJ oder JJJJ');
 $GLOBALS['TL_LANG']['tl_spielerregister']['deathplace'] = array('Todesort', 'Todesort');
+$GLOBALS['TL_LANG']['tl_spielerregister']['hideLifedata'] = array('Lebensdaten ausblenden', 'Lebensdaten im Frontend ausblenden');
 
 $GLOBALS['TL_LANG']['tl_spielerregister']['photos_legend'] = 'Fotos';
 $GLOBALS['TL_LANG']['tl_spielerregister']['multiSRC'] = array('Quelldateien', 'Bitte wählen Sie eine oder mehr Dateien oder Ordner aus der Dateiübersicht. Wenn Sie einen Ordner auswählen, werden die darin enthaltenen Dateien automatisch eingefügt.');
