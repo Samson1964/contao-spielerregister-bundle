@@ -108,7 +108,7 @@ class PlayerDetail extends \Module
 						($temp) ? $temp .= '; &dagger;' : $temp = '&dagger;';
 						($deathday) ? $temp .= ' ' . $deathday : $temp .= ' unbekannt';
 					}
-					$ergebnisliste[$zaehler]['lebensdaten'] = $this->hideLifedata ? '' : $temp;
+					$ergebnisliste[$zaehler]['lebensdaten'] = $objSuche->hideLifedata ? '' : $temp;
 					$zaehler++;
 				}
 				$this->Template->suchergebnis = $ergebnisliste;
