@@ -1,5 +1,9 @@
 # DSB-Spielerregister Changelog
 
+## Version 2.4.1 (2021-09-30)
+
+* Fix: Ausgabe der Lebensdaten bei der Suche in der Trefferliste unerwünscht, wenn Anzeige Lebensdaten deaktiviert ist
+
 ## Version 2.4.0 (2021-09-30)
 
 * Add: Option Lebensdaten im Frontend ausblenden
