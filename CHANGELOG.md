@@ -1,5 +1,9 @@
 # DSB-Spielerregister Changelog
 
+## Version 2.5.0 (2023-06-18)
+
+* Add: PHP 8 in composer.json als erlaubt eingetragen
+
 ## Version 2.4.2 (2021-09-30)
 
 * Fix: Falsche Variable beim Fix in Version 2.4.1
