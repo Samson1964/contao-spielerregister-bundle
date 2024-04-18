@@ -1,5 +1,10 @@
 # DSB-Spielerregister Changelog
 
+## Version 2.5.1 (2024-04-18)
+
+* Add: codefog/contao-haste
+* Change: Haste-Toggler statt des normalen Togglers
+
 ## Version 2.5.0 (2023-06-18)
 
 * Add: PHP 8 in composer.json als erlaubt eingetragen
