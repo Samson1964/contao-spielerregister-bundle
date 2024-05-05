@@ -34,6 +34,17 @@ class Person extends \ContentElement
 					$this->headline = sprintf($this->headline, $objPerson->firstname1.' '.$objPerson->surname1);
 				}
 
+				// Links bauen
+				$links = unserialize($objPerson->links);
+				$linkdaten = '';
+				foreach($links as $item)
+				{
+					if($item['active'])
+					{
+						$linkdaten .= $item['url'] ? '[<a href="'.$item['url'].'"'.($item['target'] ? ' target="_blank"' : '').'>'.($item['text'] ? $item['text'] : $item['url']).'</a>] ' : $item['text'];
+					}
+				}
+
 				$this->Template->addImage = false;
 				$this->Template->addBefore = false;
 
@@ -60,8 +71,8 @@ class Person extends \ContentElement
 				$this->Template->name          = $objPerson->firstname1.' '.$objPerson->surname1;
 				$this->Template->lebensdaten   = $objPerson->hideLifedata ? '' : \Schachbulle\ContaoSpielerregisterBundle\Klassen\Helper::getLebensdaten($objPerson->birthday, $objPerson->birthplace, $objPerson->death, $objPerson->deathday, $objPerson->deathplace);
 				$this->Template->kurzinfo      = $objPerson->shortinfo;
+				$this->Template->linkdaten     = $linkdaten;
 				$this->Template->langinfo      = $objPerson->longinfo;
-
 
 			}
 		}

@@ -109,6 +109,17 @@ class YeardayList extends \Module
 					// Daten vorbereiten
 					$image = \Schachbulle\ContaoSpielerregisterBundle\Klassen\Spielerregister::Bilder($objRegister->multiSRC, true); // Aktuellstes Bild laden
 
+					// Links bauen
+					$links = unserialize($objRegister->links);
+					$linkdaten = '';
+					foreach($links as $item)
+					{
+						if($item['active'])
+						{
+							$linkdaten .= $item['url'] ? '[<a href="'.$item['url'].'"'.($item['target'] ? ' target="_blank"' : '').'>'.($item['text'] ? $item['text'] : $item['url']).'</a>] ' : $item['text'];
+						}
+					}
+
 					// Daten zuweisen
 					$daten[] = array
 					(
@@ -124,6 +135,7 @@ class YeardayList extends \Module
 						'bedeutung'    => $objRegister->importance,
 						'wikipedia'    => $objRegister->wikipedia,
 						'kurzinfo'     => $objRegister->shortinfo,
+						'linkdaten'    => $linkdaten,
 						'sortierung'   => $sortierung,
 						'monatstag'    => $this->LadeTag($sortierung),
 						'image'        => $image ? $image['image'] : false,

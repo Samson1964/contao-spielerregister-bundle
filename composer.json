@@ -14,6 +14,7 @@
         "contao/core-bundle": "^4",
         "codefog/contao-haste": "*",
         "contao/newsletter-bundle": ">=0",
+        "menatwork/contao-multicolumnwizard-bundle": "*",
         "schachbulle/contao-helper-bundle": ">=0"
     },
     "conflict": {

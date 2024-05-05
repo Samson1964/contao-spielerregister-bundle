@@ -47,6 +47,12 @@
 				</div>
 			<?php endif; ?>
 
+			<?php if($item['linkdaten']): ?>
+				<div class="links">
+					<?= $item['linkdaten'] ?>
+				</div>
+			<?php endif; ?>
+
 		</div>
 	<?php endforeach; ?>
 </div>

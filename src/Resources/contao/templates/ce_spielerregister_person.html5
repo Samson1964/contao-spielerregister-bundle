@@ -2,14 +2,23 @@
 
 <?php $this->block('content'); ?>
 
+	<div class="name">
+		<?= $this->name ?>
+	</div>
+
 	<?php if(!$this->addBefore): ?>
-		<p class="lebensdaten">
+		<div class="lebensdaten">
 			<?= $this->lebensdaten ?>
-		</p>
-		<?php if ($this->kurzinfo): ?>
-			<p class="kurzinfo">
+		</div>
+		<?php if($this->kurzinfo): ?>
+			<div class="kurzinfo">
 				<?= $this->kurzinfo ?>
-			</p>
+			</div>
+		<?php endif; ?>
+		<?php if($this->linkdaten): ?>
+			<div class="links">
+				<?= $this->linkdaten ?>
+			</div>
 		<?php endif; ?>
 		<?= $this->text ?>
 	<?php endif; ?>
@@ -19,21 +28,28 @@
 	<?php endif; ?>
 	
 	<?php if($this->addBefore): ?>
-		<p class="lebensdaten">
+		<div class="lebensdaten">
 			<?= $this->lebensdaten ?>
-		</p>
-		<?php if ($this->kurzinfo): ?>
-			<p class="kurzinfo">
+		</div>
+		<?php if($this->kurzinfo): ?>
+			<div class="kurzinfo">
 				<?= $this->kurzinfo ?>
-			</p>
+			</div>
 		<?php endif; ?>
+
+		<?php if($this->linkdaten): ?>
+			<div class="links">
+				<?= $this->linkdaten ?>
+			</div>
+		<?php endif; ?>
+
 		<?= $this->text ?>
 	<?php endif; ?>
 
 	<?php if ($this->langinfo): ?>
-		<p class="langinfo">
+		<div class="langinfo">
 			<?= $this->langinfo ?>
-		</p>
+		</div>
 	<?php endif; ?>
 
 <?php $this->endblock(); ?>

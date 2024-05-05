@@ -1,5 +1,13 @@
 # DSB-Spielerregister Changelog
 
+## Version 2.6.0 (2024-05-05)
+
+* Add: Abhängigkeit menatwork/contao-multicolumnwizard-bundle
+* Fix: Warning: Undefined array key "editalias" in dca/tl_spielerregister.php (line 935) 
+* Fix: Warning: Undefined array key "tl_registerFilter" in dca/tl_spielerregister.php (line 1018) 
+* Add: tl_spielerregister.links (mit MCW) um die Links zu einem Beitrag aufzunehmen
+* Add: Filter tl_spielerregister.wikipedia und tl_spielerregister.homepage
+
 ## Version 2.5.1 (2024-04-18)
 
 * Add: codefog/contao-haste

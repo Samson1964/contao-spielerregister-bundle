@@ -31,6 +31,11 @@ $GLOBALS['TL_LANG']['tl_spielerregister']['multiSRC'] = array('Quelldateien', 'B
 
 $GLOBALS['TL_LANG']['tl_spielerregister']['info_legend'] = 'Personenbeschreibung';
 $GLOBALS['TL_LANG']['tl_spielerregister']['shortinfo'] = array('Kurzbeschreibung', 'Die Kurzbeschreibung wird in der Gesamtübersicht angezeigt.');
+$GLOBALS['TL_LANG']['tl_spielerregister']['links'] = array('Links', 'Links');
+$GLOBALS['TL_LANG']['tl_spielerregister']['link_active'] = array('Aktiv', '');
+$GLOBALS['TL_LANG']['tl_spielerregister']['link_text'] = array('Text', '');
+$GLOBALS['TL_LANG']['tl_spielerregister']['link_url'] = array('URL', '');
+$GLOBALS['TL_LANG']['tl_spielerregister']['link_target'] = array('Neues Fenster', '');
 $GLOBALS['TL_LANG']['tl_spielerregister']['longinfo'] = array('Langbeschreibung', 'Die Langbeschreibung wird zusätzlich auf der Detailseite angezeigt.');
 
 $GLOBALS['TL_LANG']['tl_spielerregister']['link_legend'] = 'Links';

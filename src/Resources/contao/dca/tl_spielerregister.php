@@ -146,7 +146,7 @@ $GLOBALS['TL_DCA']['tl_spielerregister'] = array
 	'palettes' => array
 	(
 		'__selector__'                => array('death'),
-		'default'                     => 'infobox;{namen_legend},surname1,firstname1,title,alias;{namen2_legend:hide},surname2,firstname2,surname3,firstname3,surname4,firstname4;{live_legend},birthday,birthplace,birthday_alt,death,hideLifedata;{photos_legend:hide},multiSRC;{info_legend:hide},shortinfo,longinfo;{link_legend:hide},wikipedia,fide_id,dewis_id,chessgames_id,chess365_id,chess_id,homepage;{star_legend},importance;{fide_legend},gm_title,gm_date,im_title,im_date,wgm_title,wgm_date,wim_title,wim_date;{dsb_legend},honorpresident,honormember,honorgoldpin,honorsilverpin,honorgoldbadge,honorsilverbadge,honorletter,honorplate,honormedal;{intern_legend:hide},intern;{active_legend},nohighlighting,active'
+		'default'                     => 'infobox;{namen_legend},surname1,firstname1,title,alias;{namen2_legend:hide},surname2,firstname2,surname3,firstname3,surname4,firstname4;{live_legend},birthday,birthplace,birthday_alt,death,hideLifedata;{photos_legend:hide},multiSRC;{info_legend:hide},shortinfo,links,longinfo;{link_legend:hide},wikipedia,fide_id,dewis_id,chessgames_id,chess365_id,chess_id,homepage;{star_legend},importance;{fide_legend},gm_title,gm_date,im_title,im_date,wgm_title,wgm_date,wim_title,wim_date;{dsb_legend},honorpresident,honormember,honorgoldpin,honorsilverpin,honorgoldbadge,honorsilverbadge,honorletter,honorplate,honormedal;{intern_legend:hide},intern;{active_legend},nohighlighting,active'
 	),
 
 	// Subpalettes
@@ -425,6 +425,67 @@ $GLOBALS['TL_DCA']['tl_spielerregister'] = array
 			'explanation'             => 'insertTags', 
 			'sql'                     => "mediumtext NULL"
 		),
+		'links' => array
+		(
+			'label'                   => &$GLOBALS['TL_LANG']['tl_spielerregister']['links'],
+			'exclude'                 => true,
+			'inputType'               => 'multiColumnWizard',
+			'eval'                    => array
+			(
+				'tl_class'            => 'clr',
+				'buttonPos'           => 'top',
+				'columnFields'        => array
+				(
+					'active' => array
+					(
+						'label'                 => &$GLOBALS['TL_LANG']['tl_spielerregister']['link_active'],
+						'exclude'               => true,
+						'inputType'             => 'checkbox',
+						'default'               => 1,
+						'eval'                  => array
+						(	
+							'style'             => 'width: 20px',
+						)
+					),
+					'text' => array
+					(
+						'label'                 => &$GLOBALS['TL_LANG']['tl_spielerregister']['link_text'],
+						'exclude'               => true,
+						'inputType'             => 'text',
+						'eval'                  => array
+						(
+							'style'             => 'width:90%',
+							'allowHtml'         => true
+						)
+					),
+					'url' => array
+					(
+						'label'                 => &$GLOBALS['TL_LANG']['tl_spielerregister']['link_url'],
+						'exclude'               => true,
+						'inputType'             => 'text',
+						'eval'                  => array
+						(
+							'rgxp'              => 'url',
+							'tl_class'          => 'wizard',
+							'style'             => 'width:90%',
+							'dcaPicker'         => true,
+							'addWizardClass'    => false,
+						),
+		 			),
+					'target' => array
+					(
+						'label'                 => &$GLOBALS['TL_LANG']['tl_spielerregister']['link_target'],
+						'exclude'               => true,
+						'inputType'             => 'checkbox',
+						'eval'                  => array
+						(	
+							'style'             => 'width: 20px',
+						)
+					),
+				)
+			),
+			'sql'                     => "blob NULL"
+		),
 		'longinfo' => array
 		(
 			'label'                   => &$GLOBALS['TL_LANG']['tl_spielerregister']['longinfo'],
@@ -440,6 +501,7 @@ $GLOBALS['TL_DCA']['tl_spielerregister'] = array
 			'label'                   => &$GLOBALS['TL_LANG']['tl_spielerregister']['wikipedia'],
 			'exclude'                 => true,
 			'search'                  => true,
+			'filter'                  => true,
 			'inputType'               => 'text',
 			'eval'                    => array('mandatory'=>false, 'maxlength'=>64, 'tl_class'=>'w50'),
 			'sql'                     => "varchar(64) NOT NULL default ''"
@@ -494,6 +556,7 @@ $GLOBALS['TL_DCA']['tl_spielerregister'] = array
 			'label'                   => &$GLOBALS['TL_LANG']['tl_spielerregister']['homepage'],
 			'exclude'                 => true,
 			'search'                  => true,
+			'filter'                  => true,
 			'inputType'               => 'text',
 			'eval'                    => array('mandatory'=>false, 'rgxp'=>'url', 'decodeEntities'=>true, 'maxlength'=>255, 'tl_class'=>'long clr'),
 			'sql'                     => "varchar(255) NOT NULL default ''"
@@ -869,12 +932,12 @@ class tl_spielerregister extends Backend
 		$chesslink = 'https://www.chess.com/games/search?sort=6&amp;p1=' . $dc->activeRecord->surname1 . '+' . $dc->activeRecord->firstname1;
 
 		// Popuplink generieren
-		$popuplink = 'contao/main.php?do=spielerregister&amp;table=tl_spielerregister_images&amp;id=' . $dc->activeRecord->id . '&amp;popup=1&amp;rt=' . REQUEST_TOKEN . '" title="' . sprintf(specialchars($GLOBALS['TL_LANG']['tl_content']['editalias'][1]), $dc->activeRecord->id) . '" style="padding-left:3px" onclick="Backend.openModalIframe({\'width\':840,\'title\':\'' . specialchars(str_replace("'", "\\'", sprintf($GLOBALS['TL_LANG']['tl_content']['editalias'][1], $dc->activeRecord->id))) . '\',\'url\':this.href});return false';
+		$popuplink = 'contao/main.php?do=spielerregister&amp;table=tl_spielerregister_images&amp;id=' . $dc->activeRecord->id . '&amp;popup=1&amp;rt=' . REQUEST_TOKEN . '" title="' . sprintf(specialchars(@$GLOBALS['TL_LANG']['tl_content']['editalias'][1]), $dc->activeRecord->id) . '" style="padding-left:3px" onclick="Backend.openModalIframe({\'width\':840,\'title\':\'' . specialchars(str_replace("'", "\\'", sprintf(@$GLOBALS['TL_LANG']['tl_content']['editalias'][1], $dc->activeRecord->id))) . '\',\'url\':this.href});return false';
 
 		// Vorhandene Bilder anzeigen
 		$bilder = '';
-		$objImages = $this->Database->prepare('SELECT * FROM tl_spielerregister_images WHERE pid = ?')
-		                           ->execute($dc->activeRecord->id);
+		$objImages = \Database::getInstance()->prepare('SELECT * FROM tl_spielerregister_images WHERE pid = ?')
+		                                     ->execute($dc->activeRecord->id);
 		if($objImages->numRows)
 		{
 			while($objImages->next()) 
@@ -940,24 +1003,21 @@ https://community.contao.org/de/showthread.php?48275-DCA-Filter-erstellen-von-Ch
 			),
 		);
 
-        $strBuffer = '
-<div class="tl_filter spr_filter tl_subpanel">
-<strong>' . $GLOBALS['TL_LANG']['tl_spielerregister']['filter'] . ':</strong> ' . "\n";
+		$strBuffer = '<div class="tl_filter spr_filter tl_subpanel"><strong>' . $GLOBALS['TL_LANG']['tl_spielerregister']['filter'] . ':</strong>' . "\n";
 
-        // Generate filters
-        foreach ($arrFilters as $arrFilter) {
-            $strOptions = '
-  <option value="' . $arrFilter['name'] . '">' . $arrFilter['label'] . '</option>
-  <option value="' . $arrFilter['name'] . '">---</option>' . "\n";
+		// Generate filters
+		foreach($arrFilters as $arrFilter) 
+		{
+			$strOptions = '
+			<option value="' . $arrFilter['name'] . '">' . $arrFilter['label'] . '</option>
+			<option value="' . $arrFilter['name'] . '">---</option>' . "\n";
 
-            // Generate options
-            foreach ($arrFilter['options'] as $k => $v) {
-                $strOptions .= '  <option value="' . $k . '"' . (($session['filter']['tl_registerFilter'][$arrFilter['name']] === (string) $k) ? ' selected' : '') . '>' . $v . '</option>' . "\n";
-            }
-
-            $strBuffer .= '<select name="' . $arrFilter['name'] . '" id="' . $arrFilter['name'] . '" class="tl_select' . (isset($session['filter']['tl_registerFilter'][$arrFilter['name']]) ? ' active' : '') . '">
-' . $strOptions . '
-</select>' . "\n";	
+			// Generate options
+			foreach ($arrFilter['options'] as $k => $v) {
+				$strOptions .= '  <option value="' . $k . '"' . ((@$session['filter']['tl_registerFilter'][$arrFilter['name']] === (string) $k) ? ' selected' : '') . '>' . $v . '</option>' . "\n";
+			}
+			
+			$strBuffer .= '<select name="' . $arrFilter['name'] . '" id="' . $arrFilter['name'] . '" class="tl_select' . (isset($session['filter']['tl_registerFilter'][$arrFilter['name']]) ? ' active' : '') . '">' . $strOptions . '</select>' . "\n";	
 		}
 
 		return $strBuffer . '</div>'; 
@@ -967,7 +1027,7 @@ https://community.contao.org/de/showthread.php?48275-DCA-Filter-erstellen-von-Ch
 	public function applyAdvancedFilter()
 	{
 	
-		$session = $this->Session->getData();
+		$session = \Session::getInstance()->getData();
 		
 		// Store filter values in the session
 		foreach ($_POST as $k => $v) {
@@ -984,7 +1044,7 @@ https://community.contao.org/de/showthread.php?48275-DCA-Filter-erstellen-von-Ch
 			}
 		}
 		
-		$this->Session->setData($session);
+		\Session::getInstance()->setData($session);
 		
 		if (\Input::get('id') > 0 || !isset($session['filter']['tl_registerFilter'])) {
 			return;
@@ -1071,5 +1131,5 @@ https://community.contao.org/de/showthread.php?48275-DCA-Filter-erstellen-von-Ch
 		$GLOBALS['TL_DCA']['tl_spielerregister']['list']['sorting']['root'] = $arrPlayers; 
 	
 	}
-	
+
 }
