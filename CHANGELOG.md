@@ -1,5 +1,10 @@
 # DSB-Spielerregister Changelog
 
+## Version 2.6.1 (2024-06-25)
+
+* Fix: PHP Warning: Invalid argument supplied for foreach() in Module/YeardayList.php on line 115
+* Fix: Warning: foreach() argument must be of type array|object, bool given in ContentElements/Person.php (line 40)
+
 ## Version 2.6.0 (2024-05-05)
 
 * Add: Abhängigkeit menatwork/contao-multicolumnwizard-bundle
