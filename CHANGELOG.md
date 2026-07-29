@@ -1,5 +1,9 @@
 # DSB-Spielerregister Changelog
 
+## Version 2.6.2 (2026-07-29)
+
+* Fix: Warning: Undefined array key "deleteConfirm" bei contao:migrate -> Lesezugriffe auf $GLOBALS['TL_LANG'] in den DCA-Dateien mit `?? null` bzw. `?? array()` abgesichert, da der DcaLoader die Sprachdateien noch nicht geladen hat
+
 ## Version 2.6.1 (2024-06-25)
 
 * Fix: PHP Warning: Invalid argument supplied for foreach() in Module/YeardayList.php on line 115
