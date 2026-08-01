@@ -1,7 +1,15 @@
 {
     "name": "schachbulle/contao-spielerregister-bundle",
     "type": "contao-bundle",
-    "description": "DSB-Spielerregister für Contao 4",
+    "description": "Spielerregister des Deutschen Schachbundes mit Spielerdetails, Geburtstags-, Ehren-, Verstorbenen- und Titellisten.",
+    "keywords": [
+        "contao",
+        "schach",
+        "spieler",
+        "register",
+        "dsb"
+    ],
+    "homepage": "https://github.com/Samson1964/contao-spielerregister-bundle",
     "license": "LGPL-3.0-or-later",
     "authors": [
         {
@@ -10,12 +18,11 @@
         }
     ],
     "require": {
-        "php": "^5.6 || ^7.0 || ^8.0",
-        "contao/core-bundle": "^4",
-        "codefog/contao-haste": "*",
-        "contao/newsletter-bundle": ">=0",
-        "menatwork/contao-multicolumnwizard-bundle": "*",
-        "schachbulle/contao-helper-bundle": ">=0"
+        "php": "^7.4 || ^8.0",
+        "contao/core-bundle": "^4.13 || ^5.0",
+        "contao/newsletter-bundle": "^4.13 || ^5.0",
+        "menatwork/contao-multicolumnwizard-bundle": "^3.6 || ^4.0",
+        "schachbulle/contao-helper-bundle": "^2.0"
     },
     "conflict": {
         "contao/core": "*",
@@ -23,7 +30,7 @@
     },
     "require-dev": {
         "contao/manager-plugin": "^2.0",
-        "doctrine/doctrine-cache-bundle": "^1.3"
+        "phpunit/phpunit": "^9.5"
     },
     "extra": {
         "contao-manager-plugin": "Schachbulle\\ContaoSpielerregisterBundle\\ContaoManager\\Plugin"
@@ -31,6 +38,11 @@
     "autoload": {
         "psr-4": {
             "Schachbulle\\ContaoSpielerregisterBundle\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Schachbulle\\ContaoSpielerregisterBundle\\Tests\\": "tests/"
         }
     },
     "support": {

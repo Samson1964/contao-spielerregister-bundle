@@ -1,26 +1,28 @@
 <?php
 
-/**
- * Contao Open Source CMS
+declare(strict_types=1);
+
+/*
+ * Dieses Bundle stellt das Spielerregister des Deutschen Schachbundes
+ * für Contao 4.13 und Contao 5 bereit.
  *
- * Copyright (C) 2005-2013 Leo Feyer
- *
- * @package   contao-spielerregister-bundle
- * @author    Frank Hoppe
- * @license   GNU/LGPL
- * @copyright Frank Hoppe 2013
+ * @license LGPL-3.0-or-later
  */
 
-/**
- * palettes
+use Contao\BackendUser;
+use Contao\Database;
+use Contao\System;
+
+/*
+ * Palette
+ */
+$GLOBALS['TL_DCA']['tl_settings']['palettes']['default'] .= ';{spielerregister_legend:hide},spielerregister_detailseite,spielerregister_imageSize;{spielerregister_mail_legend:hide},spielerregister_newsletter,spielerregister_cron,spielerregister_cron_neu,spielerregister_zyklus,spielerregister_wartezeit,spielerregister_mailAbsender,spielerregister_mailAbsendername,spielerregister_mailBetreff,spielerregister_mailUrl,spielerregister_mailKopf,spielerregister_mailFuss';
+
+/*
+ * Felder
  */
 
-$GLOBALS['TL_DCA']['tl_settings']['palettes']['default'] .= ';{spielerregister_legend:hide},spielerregister_detailseite,spielerregister_imageSize,spielerregister_newsletter,spielerregister_zyklus,spielerregister_wartezeit';
-
-/**
- * fields
- */
-// Seite für das Spieler-Modul
+// Seite, auf der das Modul "Spielerdetails" eingebunden ist
 $GLOBALS['TL_DCA']['tl_settings']['fields']['spielerregister_detailseite'] = array
 (
 	'label'                   => &$GLOBALS['TL_LANG']['tl_settings']['spielerregister_detailseite'],
@@ -39,8 +41,9 @@ $GLOBALS['TL_DCA']['tl_settings']['fields']['spielerregister_detailseite'] = arr
 		'type'                => 'hasOne',
 		'load'                => 'lazy'
 	)
-); 
+);
 
+// Größe der Fotos in den Frontend-Modulen
 $GLOBALS['TL_DCA']['tl_settings']['fields']['spielerregister_imageSize'] = array
 (
 	'label'                   => &$GLOBALS['TL_LANG']['tl_settings']['spielerregister_imageSize'],
@@ -62,6 +65,7 @@ $GLOBALS['TL_DCA']['tl_settings']['fields']['spielerregister_imageSize'] = array
 	'sql'                     => "varchar(255) NOT NULL default ''"
 );
 
+// Newsletter-Verteiler, an den die Cronjobs ihre E-Mails schicken
 $GLOBALS['TL_DCA']['tl_settings']['fields']['spielerregister_newsletter'] = array
 (
 	'label'                   => &$GLOBALS['TL_LANG']['tl_settings']['spielerregister_newsletter'],
@@ -73,9 +77,36 @@ $GLOBALS['TL_DCA']['tl_settings']['fields']['spielerregister_newsletter'] = arra
 		'includeBlankOption'  => true,
 		'tl_class'            => 'w50'
 	),
-	'sql'                     => "int(10) NOT NULL default ''"
+	'sql'                     => "int(10) NOT NULL default 0"
 );
 
+// Schalter für den Jahrestags-Newsletter
+$GLOBALS['TL_DCA']['tl_settings']['fields']['spielerregister_cron'] = array
+(
+	'label'                   => &$GLOBALS['TL_LANG']['tl_settings']['spielerregister_cron'],
+	'exclude'                 => true,
+	'inputType'               => 'checkbox',
+	'eval'                    => array
+	(
+		'tl_class'            => 'w50 m12'
+	),
+	'sql'                     => "char(1) NOT NULL default ''"
+);
+
+// Schalter für den Newsletter über neue Einträge
+$GLOBALS['TL_DCA']['tl_settings']['fields']['spielerregister_cron_neu'] = array
+(
+	'label'                   => &$GLOBALS['TL_LANG']['tl_settings']['spielerregister_cron_neu'],
+	'exclude'                 => true,
+	'inputType'               => 'checkbox',
+	'eval'                    => array
+	(
+		'tl_class'            => 'w50 m12'
+	),
+	'sql'                     => "char(1) NOT NULL default ''"
+);
+
+// Anzahl der E-Mails je Durchgang
 $GLOBALS['TL_DCA']['tl_settings']['fields']['spielerregister_zyklus'] = array
 (
 	'label'                   => &$GLOBALS['TL_LANG']['tl_settings']['spielerregister_zyklus'],
@@ -90,6 +121,7 @@ $GLOBALS['TL_DCA']['tl_settings']['fields']['spielerregister_zyklus'] = array
 	'sql'                     => "int(3) NOT NULL default '30'"
 );
 
+// Wartezeit zwischen zwei Durchgängen
 $GLOBALS['TL_DCA']['tl_settings']['fields']['spielerregister_wartezeit'] = array
 (
 	'label'                   => &$GLOBALS['TL_LANG']['tl_settings']['spielerregister_wartezeit'],
@@ -104,25 +136,125 @@ $GLOBALS['TL_DCA']['tl_settings']['fields']['spielerregister_wartezeit'] = array
 	'sql'                     => "int(2) NOT NULL default '0'"
 );
 
+// Absenderadresse der Newsletter
+$GLOBALS['TL_DCA']['tl_settings']['fields']['spielerregister_mailAbsender'] = array
+(
+	'label'                   => &$GLOBALS['TL_LANG']['tl_settings']['spielerregister_mailAbsender'],
+	'exclude'                 => true,
+	'inputType'               => 'text',
+	'eval'                    => array
+	(
+		'rgxp'                => 'email',
+		'maxlength'           => 255,
+		'decodeEntities'      => true,
+		'tl_class'            => 'w50 clr'
+	),
+	'sql'                     => "varchar(255) NOT NULL default ''"
+);
+
+// Anzeigename des Absenders
+$GLOBALS['TL_DCA']['tl_settings']['fields']['spielerregister_mailAbsendername'] = array
+(
+	'label'                   => &$GLOBALS['TL_LANG']['tl_settings']['spielerregister_mailAbsendername'],
+	'exclude'                 => true,
+	'inputType'               => 'text',
+	'eval'                    => array
+	(
+		'maxlength'           => 255,
+		'decodeEntities'      => true,
+		'tl_class'            => 'w50'
+	),
+	'sql'                     => "varchar(255) NOT NULL default ''"
+);
+
+// Betreff des Jahrestags-Newsletters
+$GLOBALS['TL_DCA']['tl_settings']['fields']['spielerregister_mailBetreff'] = array
+(
+	'label'                   => &$GLOBALS['TL_LANG']['tl_settings']['spielerregister_mailBetreff'],
+	'exclude'                 => true,
+	'inputType'               => 'text',
+	'eval'                    => array
+	(
+		'maxlength'           => 255,
+		'decodeEntities'      => true,
+		'tl_class'            => 'w50 clr'
+	),
+	'sql'                     => "varchar(255) NOT NULL default ''"
+);
+
+// Basis-URL für die Links in den E-Mails
+$GLOBALS['TL_DCA']['tl_settings']['fields']['spielerregister_mailUrl'] = array
+(
+	'label'                   => &$GLOBALS['TL_LANG']['tl_settings']['spielerregister_mailUrl'],
+	'exclude'                 => true,
+	'inputType'               => 'text',
+	'eval'                    => array
+	(
+		'rgxp'                => 'url',
+		'maxlength'           => 255,
+		'decodeEntities'      => true,
+		'tl_class'            => 'w50'
+	),
+	'sql'                     => "varchar(255) NOT NULL default ''"
+);
+
+// Einleitung der E-Mail
+$GLOBALS['TL_DCA']['tl_settings']['fields']['spielerregister_mailKopf'] = array
+(
+	'label'                   => &$GLOBALS['TL_LANG']['tl_settings']['spielerregister_mailKopf'],
+	'exclude'                 => true,
+	'inputType'               => 'textarea',
+	'eval'                    => array
+	(
+		'allowHtml'           => true,
+		'tl_class'            => 'clr'
+	),
+	'sql'                     => "text NULL"
+);
+
+// Fußzeile der E-Mail
+$GLOBALS['TL_DCA']['tl_settings']['fields']['spielerregister_mailFuss'] = array
+(
+	'label'                   => &$GLOBALS['TL_LANG']['tl_settings']['spielerregister_mailFuss'],
+	'exclude'                 => true,
+	'inputType'               => 'textarea',
+	'eval'                    => array
+	(
+		'allowHtml'           => true,
+		'tl_class'            => 'clr'
+	),
+	'sql'                     => "text NULL"
+);
+
+/**
+ * Stellt die Auswahlliste der Newsletter-Verteiler bereit.
+ */
 class tl_settings_spielerregister
 {
 	/**
-	 * options_callback: Ermöglicht das Befüllen eines Drop-Down-Menüs oder einer Checkbox-Liste mittels einer individuellen Funktion.
-	 * @param  $dc
-	 * @return array
+	 * Liest alle Newsletter-Verteiler für das Auswahlfeld.
+	 *
+	 * Die Liste ist alphabetisch nach dem Namen des Verteilers sortiert, weil
+	 * die Reihenfolge der IDs für Redakteure nichts aussagt.
+	 *
+	 * @param object|null $dc Der aufrufende Data Container; wird nicht ausgewertet
+	 *
+	 * @return array<int, string> Verteiler-ID => Name des Verteilers; leer, wenn
+	 *                            noch kein Verteiler angelegt wurde
 	 */
-	public function Newsletterverteiler(DataContainer $dc)
+	public function Newsletterverteiler($dc = null): array
 	{
 		$optionen = array();
-		$objNewsletter = \Database::getInstance()->prepare("SELECT * FROM tl_newsletter_channel ORDER by title ASC")
-		                                         ->execute();
-		if($objNewsletter->numRows)
+
+		$objNewsletter = Database::getInstance()
+			->prepare("SELECT id, title FROM tl_newsletter_channel ORDER BY title ASC")
+			->execute();
+
+		while ($objNewsletter->next())
 		{
-			while($objNewsletter->next())
-			{
-				$optionen[$objNewsletter->id] = $objNewsletter->title;
-			}
+			$optionen[(int) $objNewsletter->id] = $objNewsletter->title;
 		}
+
 		return $optionen;
 	}
 }

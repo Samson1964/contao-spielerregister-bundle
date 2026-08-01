@@ -1,5 +1,39 @@
 # DSB-Spielerregister Changelog
 
+## Version 3.0.0 (2026-08-01)
+
+Die Erweiterung läuft jetzt unter Contao 4.13 **und** Contao 5 sowie unter PHP 8.
+
+* Add: Unterstützung für Contao 5 und PHP 8; `composer.json` verlangt `contao/core-bundle ^4.13 || ^5.0` und `php ^7.4 || ^8.0`
+* Add: Zwei Cronjobs (`Cron/Jahrestage.php` stündlich, `Cron/Aenderungen.php` täglich) ersetzen die Aufrufskripte
+* Add: Einstellungen für den Newsletterversand (Automatikschalter, Absender, Absendername, Betreff, Basis-URL, Einleitung, Fußzeile); Absender und Rahmentexte standen bisher fest im Quelltext
+* Add: `Classes/Datum.php` bündelt die Datumsberechnungen, die vorher in fünf Klassen nahezu gleich standen; dazu 23 Unit-Tests in `tests/`
+* Add: `Classes/SpielerregisterModul.php` als gemeinsame Basis der Frontend-Module
+* Add: `Classes/Bilder.php` erzeugt Vorschaubilder über das Contao-Bildstudio
+* Add: Ausführliche `README.md` mit Beschreibung aller Module, Einstellungen und Insert-Tags
+* Delete: `public/jahrestage.php` und `public/aenderungen.php` – sie liefen über `system/initialize.php`, das es in Contao 5 nicht mehr gibt. Ein externer Cron auf diese Adressen muss abgeschaltet werden!
+* Delete: Abhängigkeit `codefog/contao-haste`; der Schnellschalter läuft jetzt über das Contao-eigene `act=toggle`
+* Delete: Moduleinstellung „Bildanzeige ab Level" (`spielerregister_image`) – sie wurde von keinem Modul ausgewertet
+* Change: Alle Klassen mit `declare(strict_types=1)`, Namensraum-Importen und deutschen Kommentarblöcken; die in Contao 5 entfallenen globalen Klassenaliase werden nicht mehr benutzt
+* Change: `TL_MODE`, `Session::getInstance()`, `Image::get()`, `Controller::addImageToTemplate()`, `Controller::generateFrontendUrl()`, `Controller::replaceInsertTags()`, `array_insert()`, `specialchars()`, `ampersand()`, `REQUEST_TOKEN`, `VERSION`/`BUILD` und `contao/main.php` durch die aktuellen Schnittstellen ersetzt
+* Change: Ehrungs-, Sterbe- und Titelliste verlinken die Person über die eingestellte Detailseite statt über das fest eingebaute `person/player/<ID>.html`
+* Change: Modul „Aktueller Jahrestag" verlinkt „Mehr Jahrestage" auf die eingestellte Weiterleitungsseite statt auf `persoenlichkeiten.html`
+* Change: CSV-Export liefert eine echte Download-Antwort statt einer Ausgabe mitten in der Backend-Seite
+* Change: `dataContainer` als Klassennamen (`DC_Table::class`), `validImageTypes` über den Container-Parameter
+* Fix: `Helper::putDate()` zerlegte jede zehn Zeichen lange Eingabe als Datum – aus „irgendwann" wurde der Wert „wannenir"
+* Fix: Insert-Tag `{{register::…}}` füllte die Lightbox nur mit dem Namen; Lebensdaten, Kurzinfo, Wikipedia-Link und Fotos fehlten
+* Fix: Beim Einlesen eines Bilderordners wurde die erste Datei übersprungen
+* Fix: Modul „Aktueller Jahrestag" und die Ehrungsliste brachen mit einem Fehler ab, sobald ein Foto geladen werden sollte (unqualifizierter Aufruf von `Image::get()`)
+* Fix: Ehrungs- und Titelliste erzeugten ohne ausgewählte Listenart einen SQL-Fehler
+* Fix: Templates verwiesen auf Bilder unter `system/modules/spielerregister/…`, die es seit Contao 4 nicht mehr gibt
+
+## Version 2.6.3 (2026-07-30)
+
+* Fix: Der Insert-Tag `{{register::…}}` fand einen Spieler praktisch nie: die ID-Suche prüfte mit `is_int()` auf einen Wert, den `explode()` immer als String liefert, und die dokumentierte Schreibweise "Nachname, Vorname" wurde gar nicht ausgewertet
+* Fix: Das Template `spielerregister_infobox` las die Bilddaten unter den Schlüsseln `singleSRC`, `thumb`, `id` und `caption`, geliefert werden aber `image`, `thumbnail`, `imageID` und `imageCaption` -> leere Links und Bilder im Lightbox-Inhalt
+* Fix: `ReplacePlayer()` belegt jetzt alle vom Template gelesenen Variablen vor, das vermeidet Warnungen wegen undefinierter Werte (`$objPlayer`, `$data[1]`, `slider`, `images`)
+* Change: Bei gefundenem Spieler wird die Templatevariable `gefunden` auf true gesetzt
+
 ## Version 2.6.2 (2026-07-29)
 
 * Fix: Warning: Undefined array key "deleteConfirm" bei contao:migrate -> Lesezugriffe auf $GLOBALS['TL_LANG'] in den DCA-Dateien mit `?? null` bzw. `?? array()` abgesichert, da der DcaLoader die Sprachdateien noch nicht geladen hat

@@ -1,157 +1,99 @@
 <?php
 
-/**
- * Contao Open Source CMS
+declare(strict_types=1);
+
+/*
+ * Dieses Bundle stellt das Spielerregister des Deutschen Schachbundes
+ * für Contao 4.13 und Contao 5 bereit.
  *
- * Copyright (c) 2005-2014 Leo Feyer
- *
- * @package   fh-counter
- * @author    Frank Hoppe
- * @license   GNU/LGPL
- * @copyright Frank Hoppe 2014
+ * @license LGPL-3.0-or-later
  */
 
-/**
- * Benutzerdefinierten Namespace festlegen, damit die Klasse ersetzt werden kann
- */
 namespace Schachbulle\ContaoSpielerregisterBundle\Module;
 
+use Contao\Database;
+use Contao\FrontendTemplate;
+use Schachbulle\ContaoSpielerregisterBundle\Classes\SpielerregisterModul;
+use Schachbulle\ContaoSpielerregisterBundle\Klassen\Helper;
+
 /**
- * Class CounterRegister
+ * Frontend-Modul "Ehrungslisten".
  *
- * @copyright  Frank Hoppe 2014
- * @author     Frank Hoppe
- *
- * Basisklasse vom FH-Counter
- * Erledigt die Zählung der jeweiligen Contenttypen und schreibt die Zählerwerte in $GLOBALS
+ * Gibt je nach Moduleinstellung die Liste der Ehrenpräsidenten, Ehrenmitglieder
+ * oder der Träger einer der Ehrennadeln, -plaketten und -urkunden des Deutschen
+ * Schachbundes aus, jeweils absteigend nach dem Jahr der Verleihung.
  */
-class HonorList extends \Module
+class HonorList extends SpielerregisterModul
 {
-
 	/**
-	 * Display a wildcard in the back end
-	 * @return string
+	 * @var string Text des Platzhalters in der Backend-Seitenstruktur
 	 */
-	public function generate()
-	{
-		if (TL_MODE == 'BE')
-		{
-			$objTemplate = new \BackendTemplate('be_spielerregister');
-
-			$objTemplate->wildcard = '### SPIELERREGISTER EHRUNGSLISTE ###';
-			$objTemplate->title = $this->name;
-			$objTemplate->id = $this->id;
-
-			return $objTemplate->parse();
-		}
-		
-		return parent::generate(); // Weitermachen mit dem Modul
-	}
+	protected $strPlatzhalter = '### SPIELERREGISTER EHRUNGSLISTE ###';
 
 	/**
-	 * Generate the module
+	 * Zuordnung der Listenart zur Spalte in tl_spielerregister.
+	 *
+	 * Die Schlüssel stehen so auch im Auswahlfeld der Moduleinstellungen.
+	 *
+	 * @var array<string, string>
+	 */
+	protected static $arrSpalten = array
+	(
+		'pr' => 'honorpresident',   // Ehrenpräsidenten
+		'me' => 'honormember',      // Ehrenmitglieder
+		'go' => 'honorgoldpin',     // Goldene Ehrennadel
+		'si' => 'honorsilverpin',   // Silberne Ehrennadel
+		'gb' => 'honorgoldbadge',   // Goldene Ehrenplakette
+		'sb' => 'honorsilverbadge', // Silberne Ehrenplakette
+		'le' => 'honorletter',      // Ehrenbrief
+		'pl' => 'honorplate',       // Ehrenteller
+		'bm' => 'honormedal'        // Bundesmedaille
+	);
+
+	/**
+	 * Stellt die Daten für das Template zusammen.
+	 *
+	 * Ist in den Moduleinstellungen keine (gültige) Listenart hinterlegt,
+	 * bleibt die Ausgabe leer – eine Abfrage ohne Spaltennamen würde sonst zu
+	 * einem SQL-Fehler führen.
+	 *
+	 * @return void
 	 */
 	protected function compile()
 	{
-		$this->import('Database');
-
-		// Art der Liste für Abfrage feststellen
-		switch($this->spielerregister_honorListtype)
-		{
-			case 'pr': // Liste der Ehrenpräsidenten
-				$sql = 'honorpresident != \'\' ORDER BY honorpresident DESC';
-				break;
-			case 'me': // Liste der Ehrenmitglieder
-				$sql = 'honormember != \'\' ORDER BY honormember DESC';
-				break;
-			case 'go': // Liste der Träger der Goldenen Ehrennadel
-				$sql = 'honorgoldpin != \'\' ORDER BY honorgoldpin DESC';
-				break;
-			case 'si': // Liste der Träger der Silbernen Ehrennadel
-				$sql = 'honorsilverpin != \'\' ORDER BY honorsilverpin DESC';
-				break;
-			case 'gb': // Liste der Träger der Goldenen Ehrenplakette
-				$sql = 'honorgoldbadge != \'\' ORDER BY honorgoldbadge DESC';
-				break;
-			case 'sb': // Liste der Träger der Silbernen Ehrenplakette
-				$sql = 'honorsilverbadge != \'\' ORDER BY honorsilverbadge DESC';
-				break;
-			case 'le': // Liste der Empfänger des Ehrenbriefes
-				$sql = 'honorletter != \'\' ORDER BY honorletter DESC';
-				break;
-			case 'pl': // Liste der Empfänger des Ehrentellers
-				$sql = 'honorplate != \'\' ORDER BY honorplate DESC';
-				break;
-			case 'bm': // Liste der Empfänger der Bundesmedaille
-				$sql = 'honormedal != \'\' ORDER BY honormedal DESC';
-				break;
-		}
-		
-		$objRegister = $this->Database->prepare('SELECT * FROM tl_spielerregister WHERE active = 1 AND ' . $sql)
-									  ->execute();
-
 		// Template-Objekt anlegen
-		$this->Template = new \FrontendTemplate('spielerregister_honorlist');
+		$this->Template = new FrontendTemplate('spielerregister_honorlist');
+		$this->Template->data = array();
+
+		$strSpalte = self::$arrSpalten[$this->spielerregister_honorListtype] ?? '';
+
+		if ('' === $strSpalte)
+		{
+			return; // Keine Listenart ausgewählt
+		}
+
+		// Der Spaltenname stammt aus der obigen Zuordnung und nicht aus der
+		// Eingabe, deshalb ist das Einsetzen in die Abfrage unbedenklich
+		$objRegister = Database::getInstance()
+			->prepare('SELECT * FROM tl_spielerregister WHERE active = 1 AND '.$strSpalte.' != \'\' ORDER BY '.$strSpalte.' DESC')
+			->execute();
 
 		$output = array();
-		$x = 0;
-		if($objRegister->numRows)
+
+		while ($objRegister->next())
 		{
-			// Datensätze anzeigen
-			while($objRegister->next()) 
-			{
-				// Jüngstes Bild laden
-				$objImage = $this->Database->prepare('SELECT * FROM tl_spielerregister_images WHERE pid = ? ORDER BY imagedate DESC')
-				                           ->limit(1)
-				                           ->execute($objRegister->id);
-				if($objImage->numRows)
-				{
-					$objFile = \FilesModel::findByPk($objImage->singleSRC);
-					$thumbnail = Image::get($objFile->path, 16, 16, 'proportional'); 
-					$output[$x]['bild'] = ''; //$thumbnail;
-				}
-				else $output[$x]['bild'] = '';
-				$output[$x]['id'] = $objRegister->id;
-				$output[$x]['vorname'] = $objRegister->firstname1;
-				$output[$x]['nachname'] = $objRegister->surname1;
-				$output[$x]['tot'] = $objRegister->death;
-				// Art der Liste für Abfrage feststellen
-				switch($this->spielerregister_honorListtype)
-				{
-					case 'pr': // Liste der Ehrenpräsidenten
-						$output[$x]['jahr'] = $objRegister->honorpresident;
-						break;
-					case 'me': // Liste der Ehrenmitglieder
-						$output[$x]['jahr'] = $objRegister->honormember;
-						break;
-					case 'go': // Liste der Träger der Goldenen Ehrennadel
-						$output[$x]['jahr'] = $objRegister->honorgoldpin;
-						break;
-					case 'si': // Liste der Träger der Silbernen Ehrennadel
-						$output[$x]['jahr'] = $objRegister->honorsilverpin;
-						break;
-					case 'gb': // Liste der Träger der Goldenen Ehrenplakette
-						$output[$x]['jahr'] = $objRegister->honorgoldbadge;
-						break;
-					case 'sb': // Liste der Träger der Silbernen Ehrenplakette
-						$output[$x]['jahr'] = $objRegister->honorsilverbadge;
-						break;
-					case 'le': // Liste der Empfänger des Ehrenbriefes
-						$output[$x]['jahr'] = $objRegister->honorletter;
-						break;
-					case 'pl': // Liste der Empfänger des Ehrentellers
-						$output[$x]['jahr'] = $objRegister->honorplate;
-						break;
-					case 'bm': // Liste der Empfänger der Bundesmaedaille
-						$output[$x]['jahr'] = $objRegister->honormedal;
-						break;
-				}
-				$x++;
-			}
+			$output[] = array
+			(
+				'id'       => $objRegister->id,
+				'vorname'  => $objRegister->firstname1,
+				'nachname' => $objRegister->surname1,
+				'tot'      => $objRegister->death,
+				'jahr'     => $objRegister->$strSpalte,
+				'link'     => Helper::getPlayerlink($objRegister->id),
+				'bild'     => '' // Vorschaubilder sind in dieser Liste abgeschaltet
+			);
 		}
 
 		$this->Template->data = $output;
-		
 	}
-
 }

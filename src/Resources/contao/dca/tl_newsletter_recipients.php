@@ -1,28 +1,49 @@
 <?php
 
-// Datenbankabfrage, wenn Tabelle tl_newsletter_recipients aktiv ist und eine ID �bergeben wurde
-// Leider wird das trotzdem noch im Info-Popup angezeigt
-if(\Input::get('table') == 'tl_newsletter_recipients' && \Input::get('id'))
-{
-	// ID des Newsletter-Verteilers laden
-	$objNewsletter = \Database::getInstance()->prepare("SELECT pid FROM tl_newsletter_recipients WHERE id = ?")
-	                                         ->execute(\Input::get('id'));
+declare(strict_types=1);
 
-	if($objNewsletter->numRows)
+/*
+ * Dieses Bundle stellt das Spielerregister des Deutschen Schachbundes
+ * für Contao 4.13 und Contao 5 bereit.
+ *
+ * @license LGPL-3.0-or-later
+ */
+
+use Contao\Config;
+use Contao\Database;
+use Contao\Input;
+
+/*
+ * Die Versandzeit wird nur bei dem Verteiler eingeblendet, der in den
+ * Einstellungen für das Spielerregister ausgewählt ist. Bei allen anderen
+ * Verteilern hat das Feld keine Bedeutung.
+ *
+ * Hinweis: Im Info-Fenster ("Datensatzdetails") wird das Feld trotzdem
+ * angezeigt, weil dort die komplette Tabelle ausgegeben wird.
+ */
+if (Input::get('table') == 'tl_newsletter_recipients' && Input::get('id'))
+{
+	// Verteiler des Empfängers laden
+	$objNewsletter = Database::getInstance()
+		->prepare("SELECT pid FROM tl_newsletter_recipients WHERE id = ?")
+		->execute(Input::get('id'));
+
+	if ($objNewsletter->numRows && $objNewsletter->pid == Config::get('spielerregister_newsletter'))
 	{
-		if($objNewsletter->pid == $GLOBALS['TL_CONFIG']['spielerregister_newsletter'])
-		{
-			// Palette manipulieren
-			$GLOBALS['TL_DCA']['tl_newsletter_recipients']['palettes']['default'] = str_replace('active', 'active,spielerregister_mailTime', $GLOBALS['TL_DCA']['tl_newsletter_recipients']['palettes']['default']);
-		}
+		// Palette erweitern
+		$GLOBALS['TL_DCA']['tl_newsletter_recipients']['palettes']['default'] = str_replace(
+			'active',
+			'active,spielerregister_mailTime',
+			$GLOBALS['TL_DCA']['tl_newsletter_recipients']['palettes']['default']
+		);
 	}
 }
 
-/**
+/*
  * Neue Felder in tl_newsletter_recipients
  */
 
-// Zeitstempel des letzten Versands des Spielerregisters
+// Zeitpunkt des letzten Versands des Jahrestags-Newsletters
 $GLOBALS['TL_DCA']['tl_newsletter_recipients']['fields']['spielerregister_mailTime'] = array
 (
 	'label'                   => &$GLOBALS['TL_LANG']['tl_newsletter_recipients']['spielerregister_mailTime'],

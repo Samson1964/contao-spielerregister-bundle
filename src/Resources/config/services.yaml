@@ -1,0 +1,29 @@
+services:
+    _defaults:
+        autoconfigure: false
+        public: false
+
+    # Cronjob: Verschickt den Jahrestags-Newsletter (Geburts- und Todestage)
+    # Läuft stündlich, weil je Durchgang nur die in den Einstellungen
+    # festgelegte Anzahl E-Mails verschickt wird. Jeder Empfänger bekommt
+    # trotzdem höchstens eine E-Mail pro Tag. Versendet wird nur, wenn in
+    # System -> Einstellungen der Haken "Jahrestags-Newsletter automatisch
+    # versenden" gesetzt ist.
+    schachbulle.spielerregister.cron.jahrestage:
+        class: Schachbulle\ContaoSpielerregisterBundle\Cron\Jahrestage
+        arguments:
+            - '@contao.framework'
+            - '@?monolog.logger.contao.cron'
+        tags:
+            - { name: contao.cronjob, interval: hourly }
+
+    # Cronjob: Meldet neu aufgenommene Personen an den Newsletter-Verteiler
+    # Läuft täglich, versendet aber nur, wenn in System -> Einstellungen der
+    # Haken "Newsletter über neue Einträge automatisch versenden" gesetzt ist.
+    schachbulle.spielerregister.cron.aenderungen:
+        class: Schachbulle\ContaoSpielerregisterBundle\Cron\Aenderungen
+        arguments:
+            - '@contao.framework'
+            - '@?monolog.logger.contao.cron'
+        tags:
+            - { name: contao.cronjob, interval: daily }

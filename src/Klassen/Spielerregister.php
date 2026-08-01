@@ -1,218 +1,312 @@
 <?php
 
-/**
- * Contao Open Source CMS
+declare(strict_types=1);
+
+/*
+ * Dieses Bundle stellt das Spielerregister des Deutschen Schachbundes
+ * für Contao 4.13 und Contao 5 bereit.
  *
- * Copyright (c) 2005-2014 Leo Feyer
- *
- * @package Core
- * @link    https://contao.org
- * @license http://www.gnu.org/licenses/lgpl-3.0.html LGPL
+ * @license LGPL-3.0-or-later
  */
 
-/**
- * Benutzerdefinierten Namespace festlegen, damit die Klasse ersetzt werden kann
- */
 namespace Schachbulle\ContaoSpielerregisterBundle\Klassen;
 
+use Contao\Config;
+use Contao\Database;
+use Contao\FilesModel;
+use Contao\FrontendTemplate;
+use Contao\StringUtil;
+use Contao\System;
+use Schachbulle\ContaoHelperBundle\Classes\Helper as HelperBundle;
+
+/**
+ * Bildaufbereitung und Insert-Tag {{register::…}} des Spielerregisters.
+ */
 class Spielerregister
 {
+	/**
+	 * @var FrontendTemplate|null Template der Infobox, von ReplacePlayer() gefüllt
+	 */
+	protected $Template;
 
 	/**
-	 * Gibt ein Array mit den Spielerbildern zurück
-	 * @param string    string      Serialisiertes Array mit den Daten
-	 * @param boolean   newestImage false = alle Bilder zurückgeben, true = nur 1 Bild zurückgeben (das jüngste)
-	 * @return array
+	 * Bereitet die im Register hinterlegten Fotos einer Person auf.
+	 *
+	 * Erwartet den Inhalt der Spalte multiSRC, also ein serialisiertes Array
+	 * mit Datei- und Ordner-UUIDs. Ordner werden eine Ebene tief aufgelöst,
+	 * verschachtelte Unterordner also nicht berücksichtigt.
+	 *
+	 * Die Bilder werden über das Contao-Bildstudio in der unter System ->
+	 * Einstellungen gewählten Größe (spielerregister_imageSize) erzeugt. Der
+	 * frühere Weg über Controller::addImageToTemplate() ist entfallen, weil es
+	 * die Methode in Contao 5 nicht mehr gibt.
+	 *
+	 * @param mixed $string      Serialisiertes Array mit den UUIDs aus multiSRC
+	 * @param bool  $newestImage False: alle Bilder zurückgeben; true: nur das
+	 *                           jüngste Bild (nach Zeitstempel der Datei)
+	 *
+	 * @return array|false Liste der Bilddaten, bei $newestImage ein einzelner
+	 *                     Bilddatensatz, oder false, wenn keine Bilder
+	 *                     hinterlegt sind bzw. keines erzeugt werden konnte
 	 */
-	public static function Bilder($string, $newestImage = false)
+	public static function Bilder($string, bool $newestImage = false)
 	{
-		global $objPage;
-
 		// Serialisierten Bilderstring in Array umwandeln und Bilder suchen
-		$multiSRC = unserialize($string);
-		if(is_array($multiSRC))
-		{
-			$objFiles = \FilesModel::findMultipleByUuids($multiSRC); // Bilder aus Datenbank laden
-		}
-		else
+		$multiSRC = StringUtil::deserialize($string);
+
+		if (!\is_array($multiSRC) || !$multiSRC)
 		{
 			return false; // Keine Bilder übergeben
 		}
 
-		$images = array();
-		$imageSize = unserialize($GLOBALS['TL_CONFIG']['spielerregister_imageSize']);
+		$objFiles = FilesModel::findMultipleByUuids($multiSRC);
 
-		if($objFiles)
+		if (null === $objFiles)
 		{
-			// Alle Datensätze iterieren
-			while($objFiles->next())
+			return false; // Keine der UUIDs steckt (noch) in der Dateiverwaltung
+		}
+
+		$images = array();
+		$imageSize = StringUtil::deserialize(Config::get('spielerregister_imageSize'));
+
+		while ($objFiles->next())
+		{
+			if ($objFiles->type == 'file')
 			{
-				
-				$objItem = \FilesModel::findByUuid($objFiles->uuid); // Objekt vom aktuellen Datensatz erstellen
+				// Einzelne Datei
+				$image = self::erzeugeBild((string) $objFiles->path, $imageSize, (int) $objFiles->tstamp);
 
-				if($objFiles->type == 'file')
+				if ($image)
 				{
-					// Datei
-
-					$objBild = new \stdClass();
-					\Controller::addImageToTemplate($objBild, array('singleSRC' => $objFiles->path, 'size' => $imageSize), \Config::get('maxImageWidth'), null, $objItem); // aktuelles $objekt übergeben!
-					//\Controller::addImageToTemplate($objBild, array('singleSRC' => $objFiles->path, 'size' => $imageSize), \Config::get('maxImageWidth'));
-
-					// Bild hinzufügen
-					$images[] = array
-					(
-						'imageID'      => mt_rand(),
-						'imageWidth'   => $objBild->arrSize[0],
-						'imageHeight'  => $objBild->arrSize[1],
-						'tstamp'       => $objFiles->tstamp,
-						'image'        => $objBild->singleSRC,
-						'imageSize'    => $objBild->imgSize,
-						'imageTitle'   => $objBild->imageTitle,
-						'imageAlt'     => $objBild->alt,
-						'imageCaption' => \Schachbulle\ContaoHelperBundle\Classes\Helper::replaceCopyright($objBild->caption),
-						'thumbnail'    => $objBild->src
-					);
-				}
-				else
-				{
-					// Ordner
-					$objSubfiles = \FilesModel::findByPid($objFiles->uuid); // Dateien des Ordners finden
-
-					if($objSubfiles->type == 'file')
-					{
-						// Alle Datensätze iterieren
-						while($objSubfiles->next())
-						{
-
-							$objItem = \FilesModel::findByUuid($objSubfiles->uuid); // Objekt vom aktuellen Datensatz erstellen
-
-							// Datei
-							$objBild = new \stdClass();
-							\Controller::addImageToTemplate($objBild, array('singleSRC' => $objSubfiles->path, 'size' => $imageSize), \Config::get('maxImageWidth'), null, $objItem); // aktuelles $objekt übergeben!
-							//\Controller::addImageToTemplate($objBild, array('singleSRC' => $objSubfiles->path, 'size' => $imageSize), \Config::get('maxImageWidth'));
-
-							// Bild hinzufügen
-							$images[] = array
-							(
-								'imageID'      => mt_rand(),
-								'imageWidth'   => $objBild->arrSize[0],
-								'imageHeight'  => $objBild->arrSize[1],
-								'tstamp'       => $objSubfiles->tstamp,
-								'image'        => $objBild->singleSRC,
-								'imageSize'    => $objBild->imgSize,
-								'imageTitle'   => $objBild->imageTitle,
-								'imageAlt'     => $objBild->alt,
-								'imageCaption' => \Schachbulle\ContaoHelperBundle\Classes\Helper::replaceCopyright($objBild->caption),
-								'thumbnail'    => $objBild->src
-							);
-						}
-					}
-
+					$images[] = $image;
 				}
 
+				continue;
+			}
+
+			// Ordner: alle darin liegenden Dateien einsammeln
+			$objSubfiles = FilesModel::findByPid($objFiles->uuid);
+
+			if (null === $objSubfiles)
+			{
+				continue;
+			}
+
+			while ($objSubfiles->next())
+			{
+				// Unterordner werden übersprungen, es wird nur eine Ebene gelesen
+				if ($objSubfiles->type != 'file')
+				{
+					continue;
+				}
+
+				$image = self::erzeugeBild((string) $objSubfiles->path, $imageSize, (int) $objSubfiles->tstamp);
+
+				if ($image)
+				{
+					$images[] = $image;
+				}
 			}
 		}
 
-		if($newestImage)
+		if ($newestImage)
 		{
 			// Nur das neueste Bild zurückgeben
 			$zeitstempel = 0; // Zeitstempel initialisieren, um aktuellstes Bild zu speichern
 			$markiert = -1; // Damit wird der Index gesichert
-			for($x = 0; $x < count($images); $x++)
+
+			for ($x = 0; $x < \count($images); $x++)
 			{
-				if($images[$x]['tstamp'] > $zeitstempel)
+				if ($images[$x]['tstamp'] > $zeitstempel)
 				{
 					// Aktuelleres Bild gefunden und merken
 					$markiert = $x;
 					$zeitstempel = $images[$x]['tstamp'];
 				}
 			}
-			// Ausgabe
-			if($markiert == -1) return false;
-			else
-			{
-				return $images[$markiert];
-			}
+
+			return ($markiert == -1) ? false : $images[$markiert];
 		}
 
 		return $images; // Bilder-Array zurückgeben
-
 	}
 
-	public static function ExtractCaption($string)
+	/**
+	 * Erzeugt aus einer Bilddatei den Datensatz für die Templates.
+	 *
+	 * Die Schlüssel des Rückgabe-Arrays sind so benannt, wie die Templates des
+	 * Bundles sie erwarten: "image" ist der Pfad zum Originalbild (Ziel der
+	 * Lightbox), "thumbnail" das erzeugte Vorschaubild.
+	 *
+	 * @param string            $strPath   Pfad der Datei, relativ zum Projektverzeichnis
+	 * @param mixed             $imageSize Bildgröße aus den Einstellungen (ID einer
+	 *                                     Bildgröße oder Array aus Breite, Höhe und Modus)
+	 * @param int               $intTstamp Zeitstempel der Datei, wird für die Suche
+	 *                                     nach dem jüngsten Bild gebraucht
+	 *
+	 * @return array|null Die Bilddaten, oder null wenn die Datei fehlt oder sich
+	 *                    nicht in ein Bild umwandeln lässt
+	 */
+	protected static function erzeugeBild(string $strPath, $imageSize, int $intTstamp): ?array
 	{
-		$parts = explode('_', $string); // Dateiname trennen
+		$figure = System::getContainer()
+			->get('contao.image.studio')
+			->createFigureBuilder()
+			->fromPath($strPath)
+			->setSize($imageSize)
+			->buildIfResourceExists();
 
-		foreach($parts as $part)
+		if (null === $figure)
 		{
-			if(is_numeric($part)) return $part;
+			return null;
+		}
+
+		$data = $figure->getLegacyTemplateData();
+
+		return array
+		(
+			'imageID'      => mt_rand(),
+			'imageWidth'   => $data['arrSize'][0] ?? 0,
+			'imageHeight'  => $data['arrSize'][1] ?? 0,
+			'tstamp'       => $intTstamp,
+			'image'        => $data['singleSRC'] ?? $strPath,
+			'imageSize'    => $data['imgSize'] ?? '',
+			'imageTitle'   => $data['imageTitle'] ?? '',
+			'imageAlt'     => $data['alt'] ?? '',
+			'imageCaption' => HelperBundle::replaceCopyright($data['caption'] ?? ''),
+			'thumbnail'    => $data['src'] ?? ''
+		);
+	}
+
+	/**
+	 * Zieht die erste Zahl aus einem Dateinamen heraus.
+	 *
+	 * Gedacht für Dateinamen wie "lasker_1921_portrait.jpg", aus denen sich die
+	 * Jahreszahl als Bildunterschrift gewinnen lässt.
+	 *
+	 * @param string $string Dateiname mit Unterstrichen als Trenner
+	 *
+	 * @return string Der erste rein numerische Bestandteil, sonst ein leerer String
+	 */
+	public static function ExtractCaption($string): string
+	{
+		$parts = explode('_', (string) $string); // Dateiname trennen
+
+		foreach ($parts as $part)
+		{
+			if (is_numeric($part))
+			{
+				return $part;
+			}
 		}
 
 		return '';
-
 	}
 
+	/**
+	 * Ersetzt den Insert-Tag {{register::Spieler|Anzeigename}} durch die Infobox.
+	 *
+	 * Als Spieler wird entweder die Spielerregister-ID oder ein Name in der
+	 * Form "Nachname, Vorname" bzw. "Vorname Nachname" erwartet. Der optionale
+	 * zweite Teil hinter dem senkrechten Strich legt fest, welcher Text im
+	 * Frontend verlinkt wird; ohne Angabe wird der Suchbegriff angezeigt.
+	 *
+	 * @param string $strTag Der komplette Insert-Tag ohne die geschweiften Klammern
+	 *
+	 * @return string|false Das geparste Template, oder false wenn es sich nicht
+	 *                      um einen Insert-Tag dieser Erweiterung handelt
+	 */
 	public function ReplacePlayer($strTag)
 	{
+		$arrSplit = explode('::', (string) $strTag);
 
-		$arrSplit = explode('::', $strTag);
-
-		if($arrSplit[0] == 'register' || $arrSplit[0] == 'cache_register')
+		if ($arrSplit[0] != 'register' && $arrSplit[0] != 'cache_register')
 		{
-			// Inhalt des Inserttags trennen
-			$data = explode('|', $arrSplit[1]);
+			return false; // Nicht unser Insert-Tag
+		}
 
-			// Template-Objekt erzeugen
-			$this->Template = new \FrontendTemplate('spielerregister_infobox');
+		// Inhalt des Inserttags trennen
+		$data = explode('|', $arrSplit[1] ?? '');
 
-			$found = false; // Spieler erstmal auf nicht gefunden setzen
-			// Parameter prüfen
-			if(is_int($data[0]))
-			{
-				// Übergeben wurde die Spielerregister-ID, SQL-Abfrage zusammenbauen
-				$objPlayer = \Database::getInstance()->prepare("SELECT * FROM tl_spielerregister WHERE id=?")
-				                                     ->execute($data[0]);
-			}
-			elseif($data[0])
-			{
-				// Übergeben wurde ein String, Trennung nach Komma versuchen
-				$teile = explode(',', $data[0]);
-				if(count($teile) == 1)
-				{
-					// Trennung nach Leerzeichen versuchen
-					$teile = explode(' ', $data[0]);
-					if(count($teile) == 1)
-					{
-						// Nur 1 Wort vorhanden
-					}
-					elseif(count($teile) > 1)
-					{
-						$objPlayer = \Database::getInstance()->prepare("SELECT * FROM tl_spielerregister WHERE surname1 = ? AND firstname1 = ?")
-						                                     ->execute($teile[1], $teile[0]);
-					}
-				}
-			}
+		// Template-Objekt erzeugen
+		$this->Template = new FrontendTemplate('spielerregister_infobox');
 
-			// Suche auswerten
-			if($objPlayer && $objPlayer->numRows == 1)
+		// Alle vom Template gelesenen Variablen vorbelegen, sonst greift es
+		// auf undefinierte Werte zu
+		$this->Template->playerid = 0;
+		$this->Template->playername = '';
+		$this->Template->lebensdaten = '';
+		$this->Template->kurzinfo = '';
+		$this->Template->wikipedia = '';
+		$this->Template->slider = false;
+		$this->Template->images = array();
+		$this->Template->gefunden = false;
+
+		$objPlayer = null; // Erstmal kein Spieler gefunden
+
+		// Parameter prüfen
+		// Hinweis: explode() liefert immer Strings, deshalb ctype_digit()
+		// statt is_int() – sonst wird die ID-Suche nie erreicht
+		if (ctype_digit((string) $data[0]))
+		{
+			// Übergeben wurde die Spielerregister-ID, SQL-Abfrage zusammenbauen
+			$objPlayer = Database::getInstance()
+				->prepare("SELECT * FROM tl_spielerregister WHERE id=?")
+				->execute($data[0]);
+		}
+		elseif ($data[0])
+		{
+			// Übergeben wurde ein Name, Trennung nach Komma versuchen
+			$teile = explode(',', $data[0]);
+
+			if (\count($teile) > 1)
 			{
-				$this->Template->playername = $data[1] ? $data[1] : $data[0];
-				$this->Template->playerid = $objPlayer->id;
+				// Schreibweise "Nachname, Vorname"
+				$objPlayer = Database::getInstance()
+					->prepare("SELECT * FROM tl_spielerregister WHERE surname1 = ? AND firstname1 = ?")
+					->execute(trim($teile[0]), trim($teile[1]));
 			}
 			else
 			{
-				// Template mit Vorgabewerten füllen
-				$this->Template->playername = $data[1] ? $data[1] : $data[0];
-				$this->Template->gefunden = false;
-			}
+				// Trennung nach Leerzeichen versuchen
+				$teile = explode(' ', $data[0]);
 
-			// Geparstes Template zurückgeben
-			return $this->Template->parse();
+				if (\count($teile) > 1)
+				{
+					// Schreibweise "Vorname Nachname"
+					$objPlayer = Database::getInstance()
+						->prepare("SELECT * FROM tl_spielerregister WHERE surname1 = ? AND firstname1 = ?")
+						->execute(trim($teile[1]), trim($teile[0]));
+				}
+			}
 		}
 
-		// Nicht unser Insert-Tag
-		return false;
+		// Suche auswerten
+		$strAnzeige = ($data[1] ?? '') !== '' ? $data[1] : $data[0];
 
+		$this->Template->playername = $strAnzeige;
+
+		if ($objPlayer && $objPlayer->numRows == 1)
+		{
+			$this->Template->playerid = $objPlayer->id;
+			$this->Template->gefunden = true;
+
+			// Inhalt der Lightbox füllen. Ohne diese Zuweisungen blieb die Box
+			// bis auf den Namen leer, obwohl das Template die Daten ausgibt.
+			$this->Template->lebensdaten = $objPlayer->hideLifedata ? '' : Helper::getLebensdaten($objPlayer->birthday, $objPlayer->birthplace, $objPlayer->death, $objPlayer->deathday, $objPlayer->deathplace);
+			$this->Template->kurzinfo = $objPlayer->shortinfo;
+			$this->Template->wikipedia = $objPlayer->wikipedia;
+
+			$images = self::Bilder($objPlayer->multiSRC);
+
+			if ($images)
+			{
+				$this->Template->slider = true;
+				$this->Template->images = $images;
+			}
+		}
+
+		// Geparstes Template zurückgeben
+		return $this->Template->parse();
 	}
-
 }

@@ -1,23 +1,27 @@
 <?php
-/**
- * Avatar for Contao Open Source CMS
+
+declare(strict_types=1);
+
+/*
+ * Dieses Bundle stellt das Spielerregister des Deutschen Schachbundes
+ * für Contao 4.13 und Contao 5 bereit.
  *
- * Copyright (C) 2013 Kirsten Roschanski
- * Copyright (C) 2013 Tristan Lins <http://bit3.de>
- *
- * @package    Avatar
- * @license    http://opensource.org/licenses/lgpl-3.0.html LGPL
+ * @license LGPL-3.0-or-later
  */
 
-/**
- * Add palette to tl_module
+/*
+ * Paletten der Frontend-Module
  */
-$GLOBALS['TL_DCA']['tl_module']['palettes']['spielerregister_yeardaylist'] = '{title_legend},name,type;{options_legend},spielerregister_jumpTo,spielerregister_level,spielerregister_image,spielerregister_lastday;{expert_legend:hide},cssID,align,space';
-$GLOBALS['TL_DCA']['tl_module']['palettes']['spielerregister_yearday'] = '{title_legend},name,type;{options_legend},spielerregister_jumpTo,spielerregister_level,spielerregister_image;{expert_legend:hide},cssID,align,space';
+$GLOBALS['TL_DCA']['tl_module']['palettes']['spielerregister_yeardaylist'] = '{title_legend},name,type;{options_legend},spielerregister_jumpTo,spielerregister_level,spielerregister_lastday;{expert_legend:hide},cssID,align,space';
+$GLOBALS['TL_DCA']['tl_module']['palettes']['spielerregister_yearday'] = '{title_legend},name,type;{options_legend},spielerregister_jumpTo,spielerregister_level;{expert_legend:hide},cssID,align,space';
 $GLOBALS['TL_DCA']['tl_module']['palettes']['spielerregister_playerdetail'] = '{title_legend},name,type;{options_legend},spielerregister_jumpTo;{expert_legend:hide},cssID,align,space';
 $GLOBALS['TL_DCA']['tl_module']['palettes']['spielerregister_honorlist'] = '{title_legend},name,headline,type;{options_legend},spielerregister_honorListtype;{expert_legend:hide},cssID,align,space';
 $GLOBALS['TL_DCA']['tl_module']['palettes']['spielerregister_deathlist'] = '{title_legend},name,headline,type;{options_legend},spielerregister_deathlist_months;{expert_legend:hide},cssID,align,space';
 $GLOBALS['TL_DCA']['tl_module']['palettes']['spielerregister_titlelist'] = '{title_legend},name,headline,type;{options_legend},spielerregister_titlelist;{expert_legend:hide},cssID,align,space';
+
+/*
+ * Felder
+ */
 
 $GLOBALS['TL_DCA']['tl_module']['fields']['spielerregister_level'] = array
 (
@@ -29,18 +33,6 @@ $GLOBALS['TL_DCA']['tl_module']['fields']['spielerregister_level'] = array
 	'reference'        => &$GLOBALS['TL_LANG']['tl_spielerregister'],
 	'eval'             => array('tl_class'=>'w50'),
 	'sql'              => "char(2) NOT NULL default '5'"
-);
-
-$GLOBALS['TL_DCA']['tl_module']['fields']['spielerregister_image'] = array
-(
-	'label'            => &$GLOBALS['TL_LANG']['tl_module']['spielerregister_image'],
-	'exclude'          => true,
-	'default'          => 6,
-	'inputType'        => 'select',
-	'options'          => array(10, 9, 8, 7, 6, 5, 4, 3, 2, 1),
-	'reference'        => &$GLOBALS['TL_LANG']['tl_spielerregister'],
-	'eval'             => array('tl_class'=>'w50 clr'),
-	'sql'              => "char(2) NOT NULL default '6'"
 );
 
 $GLOBALS['TL_DCA']['tl_module']['fields']['spielerregister_lastday'] = array

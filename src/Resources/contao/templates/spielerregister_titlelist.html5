@@ -16,7 +16,14 @@
 		</tr>
 	<?php foreach($this->data as $item): ?>
 		<tr>
-			<td><a href="person/player/<?= $item['id'] ?>.html"><?= $item['vorname'] ?> <?= $item['nachname']; ?></a><?php if($item['tot']) echo ' &dagger;'; ?></td>
+			<td>
+				<?php if($item['link']): ?>
+					<a href="<?= $item['link'] ?>"><?= $item['vorname'] ?> <?= $item['nachname'] ?></a>
+				<?php else: ?>
+					<?= $item['vorname'] ?> <?= $item['nachname'] ?>
+				<?php endif; ?>
+				<?php if($item['tot']) echo ' &dagger;'; ?>
+			</td>
 			<td><?= $item['geburtstag'] ?></td>
 			<td><?= $item['sterbetag'] ?></td>
 			<td><?= $item['titeldatum'] ?></td>

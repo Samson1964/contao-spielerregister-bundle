@@ -21,7 +21,7 @@ if($this->bild)
 echo '<div class="spielername">';
 if($this->wikipedia)
 {
-	echo '<a href="http://de.wikipedia.org/wiki/' . $this->wikipedia . '" target="_blank"><img src="system/modules/spielerregister/assets/images/wikipedia.png" alt=""></a> ';
+	echo '<a href="http://de.wikipedia.org/wiki/' . $this->wikipedia . '" target="_blank"><img src="bundles/contaospielerregister/images/wikipedia.png" alt=""></a> ';
 }
 echo $this->vorname . ' ';
 echo $this->nachname;
@@ -48,5 +48,7 @@ echo '</div>';
 
 ?>
 
-<p class="portalboxlink"><a href="persoenlichkeiten.html">Mehr Jahrestage</a></p>
+<?php if($this->mehrlink): ?>
+	<p class="portalboxlink"><a href="<?= $this->mehrlink ?>">Mehr Jahrestage</a></p>
+<?php endif; ?>
 </div>

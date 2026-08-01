@@ -1,87 +1,81 @@
 <?php
 
+declare(strict_types=1);
+
+/*
+ * Dieses Bundle stellt das Spielerregister des Deutschen Schachbundes
+ * für Contao 4.13 und Contao 5 bereit.
+ *
+ * @license LGPL-3.0-or-later
+ */
+
 namespace Schachbulle\ContaoSpielerregisterBundle\ContentElements;
 
-class Person extends \ContentElement
-{
+use Contao\ContentElement;
+use Contao\Database;
+use Schachbulle\ContaoSpielerregisterBundle\Klassen\Helper;
 
+/**
+ * Inhaltselement "Person aus dem Spielerregister".
+ *
+ * Gibt eine im Register gepflegte Person mit Lebensdaten, Kurzinfo und
+ * Weblinks aus, ohne dass die Daten im Artikel doppelt gepflegt werden müssen.
+ */
+class Person extends ContentElement
+{
 	/**
-	 * Template
-	 * @var string
+	 * @var string Template des Inhaltselements
 	 */
 	protected $strTemplate = 'ce_spielerregister_person';
 
 	/**
-	 * Generate the module
+	 * Stellt die Daten für das Template zusammen.
+	 *
+	 * Enthält die Überschrift den Platzhalter %s, wird dort der Name der Person
+	 * eingesetzt. Ist keine Person ausgewählt oder wurde der Datensatz
+	 * gelöscht, bleibt die Ausgabe bis auf die Überschrift leer.
+	 *
+	 * @return void
 	 */
 	protected function compile()
 	{
+		// Vom Template gelesene Variablen vorbelegen
+		$this->Template->addImage = false;
+		$this->Template->addBefore = false;
+		$this->Template->name = '';
+		$this->Template->lebensdaten = '';
+		$this->Template->kurzinfo = '';
+		$this->Template->linkdaten = '';
+		$this->Template->langinfo = '';
 
-		// Person aus Datenbank laden, wenn ID übergeben wurde
-		if($this->spielerregister_id)
+		if (!$this->spielerregister_id)
 		{
-			$objPerson = $this->Database->prepare("SELECT * FROM tl_spielerregister WHERE id=?")
-			                            ->execute($this->spielerregister_id);
-
-			// Adresse gefunden
-			if($objPerson->numRows)
-			{
-				// Überschrift auf Platzhalter %s prüfen
-				$pos = strpos($this->headline, '%s');
-				if($pos !== false)
-				{
-					// Überschrift ändern
-					$this->headline = sprintf($this->headline, $objPerson->firstname1.' '.$objPerson->surname1);
-				}
-
-				// Links bauen
-				$links = (array)unserialize($objPerson->links);
-				$linkdaten = '';
-				if(is_array($links) && count($links) > 0)
-				{
-					foreach($links as $item)
-					{
-						if(isset($item['active']) && $item['active'])
-						{
-							$linkdaten .= $item['url'] ? '[<a href="'.$item['url'].'"'.($item['target'] ? ' target="_blank"' : '').'>'.($item['text'] ? $item['text'] : $item['url']).'</a>] ' : $item['text'];
-						}
-					}
-				}
-
-				$this->Template->addImage = false;
-				$this->Template->addBefore = false;
-
-				// Add an image
-				//if ($this->addImage)
-				//{
-				//	$figure = \System::getContainer()
-				//		->get(\Contao\CoreBundle\Image\Studio\Studio::class)
-				//		->createFigureBuilder()
-				//		->from($this->singleSRC)
-				//		->setSize($this->size)
-				//		->setMetadata($this->objModel->getOverwriteMetadata())
-				//		->enableLightbox((bool) $this->fullsize)
-				//		->buildIfResourceExists();
-                //
-				//	if (null !== $figure)
-				//	{
-				//		$figure->applyLegacyTemplateData($this->Template, $this->imagemargin, $this->floating);
-				//	}
-				//}
-
-				// Daten aus tl_content in das Template schreiben
-				$this->Template->headline      = $this->headline;
-				$this->Template->name          = $objPerson->firstname1.' '.$objPerson->surname1;
-				$this->Template->lebensdaten   = $objPerson->hideLifedata ? '' : \Schachbulle\ContaoSpielerregisterBundle\Klassen\Helper::getLebensdaten($objPerson->birthday, $objPerson->birthplace, $objPerson->death, $objPerson->deathday, $objPerson->deathplace);
-				$this->Template->kurzinfo      = $objPerson->shortinfo;
-				$this->Template->linkdaten     = $linkdaten;
-				$this->Template->langinfo      = $objPerson->longinfo;
-
-			}
+			return; // Keine Person ausgewählt
 		}
 
-		return;
+		$objPerson = Database::getInstance()
+			->prepare("SELECT * FROM tl_spielerregister WHERE id=?")
+			->execute($this->spielerregister_id);
 
+		if (!$objPerson->numRows)
+		{
+			return; // Datensatz existiert nicht mehr
+		}
+
+		$strName = trim($objPerson->firstname1.' '.$objPerson->surname1);
+
+		// Überschrift auf Platzhalter %s prüfen und Namen einsetzen
+		if (false !== strpos((string) $this->headline, '%s'))
+		{
+			$this->headline = sprintf($this->headline, $strName);
+		}
+
+		// Daten aus tl_spielerregister in das Template schreiben
+		$this->Template->headline = $this->headline;
+		$this->Template->name = $strName;
+		$this->Template->lebensdaten = $objPerson->hideLifedata ? '' : Helper::getLebensdaten($objPerson->birthday, $objPerson->birthplace, $objPerson->death, $objPerson->deathday, $objPerson->deathplace);
+		$this->Template->kurzinfo = $objPerson->shortinfo;
+		$this->Template->linkdaten = Helper::getLinks($objPerson->links);
+		$this->Template->langinfo = $objPerson->longinfo;
 	}
-
 }

@@ -1,59 +1,73 @@
-<?php if (!defined('TL_ROOT')) die('You cannot access this file directly!');
+<?php
 
-/**
- * Contao Open Source CMS
+declare(strict_types=1);
+
+/*
+ * Dieses Bundle stellt das Spielerregister des Deutschen Schachbundes
+ * für Contao 4.13 und Contao 5 bereit.
  *
- * Copyright (C) 2005-2013 Leo Feyer
- *
- * @package   bdf
- * @author    Frank Hoppe
- * @license   GNU/LGPL
- * @copyright Frank Hoppe 2014
+ * @license LGPL-3.0-or-later
  */
 
-/**
+use Contao\ArrayUtil;
+use Schachbulle\ContaoSpielerregisterBundle\Classes\Tags;
+use Schachbulle\ContaoSpielerregisterBundle\ContentElements\Person;
+use Schachbulle\ContaoSpielerregisterBundle\Klassen\Spielerregister;
+use Schachbulle\ContaoSpielerregisterBundle\Module\DeathList;
+use Schachbulle\ContaoSpielerregisterBundle\Module\Export;
+use Schachbulle\ContaoSpielerregisterBundle\Module\HonorList;
+use Schachbulle\ContaoSpielerregisterBundle\Module\PlayerDetail;
+use Schachbulle\ContaoSpielerregisterBundle\Module\TitleList;
+use Schachbulle\ContaoSpielerregisterBundle\Module\Yearday;
+use Schachbulle\ContaoSpielerregisterBundle\Module\YeardayList;
+
+/*
  * Frontend-Module des Spielerregisters
+ *
+ * Die Registrierung über $GLOBALS['FE_MOD'] funktioniert in Contao 4.13 und
+ * Contao 5 gleichermaßen; die Klassen erben weiterhin von Contao\Module.
  */
 $GLOBALS['FE_MOD']['spielerregister'] = array
 (
-	'spielerregister_playerdetail' => 'Schachbulle\ContaoSpielerregisterBundle\Module\PlayerDetail',
-	'spielerregister_yeardaylist'  => 'Schachbulle\ContaoSpielerregisterBundle\Module\YeardayList',
-	'spielerregister_yearday'      => 'Schachbulle\ContaoSpielerregisterBundle\Module\Yearday',
-	'spielerregister_honorlist'    => 'Schachbulle\ContaoSpielerregisterBundle\Module\HonorList',
-	'spielerregister_deathlist'    => 'Schachbulle\ContaoSpielerregisterBundle\Module\DeathList',
-	'spielerregister_titlelist'    => 'Schachbulle\ContaoSpielerregisterBundle\Module\TitleList',
+	'spielerregister_playerdetail' => PlayerDetail::class,
+	'spielerregister_yeardaylist'  => YeardayList::class,
+	'spielerregister_yearday'      => Yearday::class,
+	'spielerregister_honorlist'    => HonorList::class,
+	'spielerregister_deathlist'    => DeathList::class,
+	'spielerregister_titlelist'    => TitleList::class,
 );
 
-/**
- * Backend-Module des Spielerregisters in das Backend-Menü "Inhalte" an Position 1 einfügen
+/*
+ * Backend-Modul des Spielerregisters in das Backend-Menü "Inhalte" an Position 1
+ * einfügen. ArrayUtil::arrayInsert() ersetzt die in Contao 5 entfallene globale
+ * Funktion array_insert().
  */
-array_insert($GLOBALS['BE_MOD']['content'], 1, array
+ArrayUtil::arrayInsert($GLOBALS['BE_MOD']['content'], 1, array
 (
 	'spielerregister' => array
 	(
 		'tables'         => array('tl_spielerregister', 'tl_spielerregister_images'),
 		'icon'           => 'bundles/contaospielerregister/images/icon.png',
-		'export'         => array('Schachbulle\ContaoSpielerregisterBundle\Module\Export', 'exportSpieler')
+		'export'         => array(Export::class, 'exportSpieler')
 	)
 ));
 
-/**
+/*
  * Inhaltselemente
  */
- 
-$GLOBALS['TL_CTE']['includes']['spielerregister_person'] = 'Schachbulle\ContaoSpielerregisterBundle\ContentElements\Person';
+$GLOBALS['TL_CTE']['includes']['spielerregister_person'] = Person::class;
 
-/**
- * Inserttag für Registerersetzung in den Hooks anmelden
+/*
+ * Insert-Tags anmelden
  */
+$GLOBALS['TL_HOOKS']['replaceInsertTags'][] = array(Spielerregister::class, 'ReplacePlayer');
+$GLOBALS['TL_HOOKS']['replaceInsertTags'][] = array(Tags::class, 'Register');
 
-$GLOBALS['TL_HOOKS']['replaceInsertTags'][] = array('Schachbulle\ContaoSpielerregisterBundle\Klassen\Spielerregister','ReplacePlayer');
-$GLOBALS['TL_HOOKS']['replaceInsertTags'][] = array('Schachbulle\ContaoSpielerregisterBundle\Classes\Tags','Register');
-
-/**
+/*
  * Voreinstellungen
+ *
+ * Anzahl der E-Mails je Durchgang und Wartezeit zwischen zwei Durchgängen des
+ * Jahrestags-Newsletters; einstellbar unter System -> Einstellungen.
  */
-
 $GLOBALS['TL_CONFIG']['spielerregister_zyklus'] = 30;
 $GLOBALS['TL_CONFIG']['spielerregister_wartezeit'] = 0;
-

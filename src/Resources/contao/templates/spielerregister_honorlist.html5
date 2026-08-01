@@ -14,7 +14,12 @@
 				<?php if($array['bild']): ?>
 					<img src="<?php echo $array['bild']; ?>" alt="">
 				<?php endif; ?>
-				<a href="person/player/<?php echo $array['id']; ?>.html"><?php echo $array['vorname']; ?> <?php echo $array['nachname']; ?></a><?php if($array['tot']) echo ' &dagger;'; ?>
+				<?php if($array['link']): ?>
+					<a href="<?php echo $array['link']; ?>"><?php echo $array['vorname']; ?> <?php echo $array['nachname']; ?></a>
+				<?php else: ?>
+					<?php echo $array['vorname']; ?> <?php echo $array['nachname']; ?>
+				<?php endif; ?>
+				<?php if($array['tot']) echo ' &dagger;'; ?>
 			</td>
 		</tr>
 	<?php endforeach; ?>
