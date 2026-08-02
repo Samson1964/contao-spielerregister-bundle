@@ -1,5 +1,33 @@
 # DSB-Spielerregister Changelog
 
+## Version 3.0.1 (2026-08-02)
+
+Geprüft mit PHP 8.3 gegen Contao 4.13.58 und Contao 5.7.7, jeweils mit dem
+Datenbestand von schachbund.de (3061 Personen).
+
+* Fix: Die Einstellungsseite des Backends brach unter Contao 5 mit „You have
+  requested a non-existent service `contao.image.image_sizes`“ ab. Die
+  Auswahlliste der Bildgröße holt den Dienst jetzt unter seinem aktuellen Namen
+  `contao.image.sizes`, den auch Contao 4.13 kennt.
+* Fix: Die Fotoliste einer Person ließ sich unter Contao 5 gar nicht öffnen
+  („ValueError: The arguments array must contain 1 items, 0 given“). Contao 5
+  setzt die Zeilenbeschriftung aus den unter `list.label.fields` genannten
+  Spalten zusammen, bevor es das `label_callback` aufruft; ohne diese Angabe
+  läuft der Kern in `vsprintf('%s', array())`.
+* Fix: Auf der Detailseite einer Person blieben die ausführlichen Informationen
+  immer leer – gelesen wurde die Spalte `langinfo`, die es nicht gibt; sie heißt
+  `longinfo`.
+* Change: Frontend-URLs entstehen jetzt an einer Stelle (`Helper::seitenUrl()`)
+  über den Dienst `contao.routing.content_url_generator`, sofern vorhanden;
+  `PageModel::getFrontendUrl()` ist seit Contao 5.3 veraltet und entfällt in
+  Contao 6. Unter Contao 4.13 bleibt es beim bisherigen Weg.
+* Change: Das Suchformular der Detailseite bekommt seine Adresse aus dem
+  Symfony-Request statt aus `Environment::get('indexFreeRequest')`; letzteres
+  löste unter Contao 5 zwei Verfallsmeldungen aus.
+* Change: Der Sitzungsbehälter des erweiterten Filters wird ausdrücklich auf
+  `AttributeBagInterface` geprüft, dazu vollständige Array-Typangaben in elf
+  Kommentarblöcken (PHPStan Stufe 6 ohne Beanstandung).
+
 ## Version 3.0.0 (2026-08-01)
 
 Die Erweiterung läuft jetzt unter Contao 4.13 **und** Contao 5 sowie unter PHP 8.

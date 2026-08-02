@@ -24,7 +24,7 @@ class ContaoSpielerregisterExtension extends Extension
 	/**
 	 * Liest die services.yaml des Bundles ein.
 	 *
-	 * @param array            $mergedConfig Aufbereitete Konfiguration; das Bundle
+	 * @param array<string, mixed> $mergedConfig Aufbereitete Konfiguration; das Bundle
 	 *                                       besitzt keine eigene Konfiguration und
 	 *                                       wertet den Wert deshalb nicht aus
 	 * @param ContainerBuilder $container    Container, in den die Dienste kommen

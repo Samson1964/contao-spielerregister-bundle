@@ -58,9 +58,14 @@ $GLOBALS['TL_DCA']['tl_settings']['fields']['spielerregister_imageSize'] = array
 		'helpwizard'          => true,
 		'tl_class'            => 'w50 clr'
 	),
+	// Liefert die im System hinterlegten Bildgrößen als Auswahlliste, beschränkt
+	// auf die Größen, die der angemeldete Benutzer sehen darf. Der Dienst heißt
+	// seit Contao 5 "contao.image.sizes"; unter Contao 4.13 ist
+	// "contao.image.image_sizes" nur noch ein Alias darauf, der alte Name führt
+	// in Contao 5 dagegen zu einem Fehler.
 	'options_callback'        => static function ()
 	{
-		return System::getContainer()->get('contao.image.image_sizes')->getOptionsForUser(BackendUser::getInstance());
+		return System::getContainer()->get('contao.image.sizes')->getOptionsForUser(BackendUser::getInstance());
 	},
 	'sql'                     => "varchar(255) NOT NULL default ''"
 );

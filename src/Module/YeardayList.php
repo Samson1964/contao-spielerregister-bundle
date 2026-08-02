@@ -114,7 +114,7 @@ class YeardayList extends SpielerregisterModul
 			(
 				'typ'          => $typ,
 				'id'           => $objRegister->id,
-				'spielerlink'  => null !== $jumpTo ? $jumpTo->getFrontendUrl('/player/'.$objRegister->id) : '',
+				'spielerlink'  => Helper::seitenUrl($jumpTo, '/player/'.$objRegister->id),
 				'nachname'     => $objRegister->surname1,
 				'vorname'      => $objRegister->firstname1,
 				'geburtstag'   => $this->DatumToString($objRegister->birthday, 'unbekannt'),

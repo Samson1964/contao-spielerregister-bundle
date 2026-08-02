@@ -12,15 +12,16 @@ declare(strict_types=1);
 namespace Schachbulle\ContaoSpielerregisterBundle\Module;
 
 use Contao\Database;
-use Contao\Environment;
 use Contao\FilesModel;
 use Contao\FrontendTemplate;
 use Contao\Input;
 use Contao\PageModel;
 use Contao\StringUtil;
+use Contao\System;
 use Schachbulle\ContaoHelperBundle\Classes\Helper as HelperBundle;
 use Schachbulle\ContaoSpielerregisterBundle\Classes\Bilder;
 use Schachbulle\ContaoSpielerregisterBundle\Classes\SpielerregisterModul;
+use Schachbulle\ContaoSpielerregisterBundle\Klassen\Helper;
 use Schachbulle\ContaoSpielerregisterBundle\Klassen\Spielerregister;
 
 /**
@@ -111,8 +112,17 @@ class PlayerDetail extends SpielerregisterModul
 		$this->Template->imageHeight = 0;
 		$this->Template->debug = '';
 
-		// Link zur aktuellen Seite (inkl. Parameter) für Suchformular zuweisen
-		$this->Template->action = StringUtil::ampersand(Environment::get('indexFreeRequest'));
+		// Link zur aktuellen Seite (inkl. Parameter) für das Suchformular. Das
+		// mitgelieferte Template schickt das Formular mit action="" an die
+		// aktuelle Adresse; die Variable ist deshalb nur für abgewandelte
+		// Templates da und wird hier weiter gefüllt.
+		//
+		// Früher stand hier Environment::get('indexFreeRequest'); das greift
+		// intern auf Environment::request() und ::script() zu, die Contao 5 für
+		// veraltet erklärt hat. Der Symfony-Request liefert dieselbe Adresse und
+		// funktioniert in Contao 4.13 genauso.
+		$objRequest = System::getContainer()->get('request_stack')->getCurrentRequest();
+		$this->Template->action = StringUtil::ampersand(null !== $objRequest ? $objRequest->getRequestUri() : '');
 
 		// Suche auswerten
 		if ($this->playersearch)
@@ -137,7 +147,7 @@ class PlayerDetail extends SpielerregisterModul
 				{
 					$ergebnisliste[$zaehler]['name'] = $objSuche->firstname1.' '.$objSuche->surname1;
 					$ergebnisliste[$zaehler]['id'] = $objSuche->id;
-					$ergebnisliste[$zaehler]['link'] = null !== $jumpTo ? $jumpTo->getFrontendUrl('/player/'.$objSuche->id) : '';
+					$ergebnisliste[$zaehler]['link'] = Helper::seitenUrl($jumpTo, '/player/'.$objSuche->id);
 
 					// Lebensdaten für Ausgabe aufbereiten
 					$birthday = $this->DatumToString($objSuche->birthday);
@@ -202,7 +212,11 @@ class PlayerDetail extends SpielerregisterModul
 		$this->Template->bedeutung = $objRegister->importance;
 		$this->Template->wikipedia = $objRegister->wikipedia;
 		$this->Template->kurzinfo = $objRegister->shortinfo;
-		$this->Template->langinfo = $objRegister->langinfo;
+		// Die Spalte heißt longinfo; das Template erwartet die Variable langinfo.
+		// Vorher stand hier $objRegister->langinfo – eine Spalte dieses Namens
+		// gibt es nicht, deshalb blieb der ausführliche Text auf der Detailseite
+		// immer leer.
+		$this->Template->langinfo = $objRegister->longinfo;
 		$this->Template->chess365_id = $objRegister->chess365_id;
 		$this->Template->chess_id = $objRegister->chess_id;
 		$this->Template->chessgames_id = $objRegister->chessgames_id;

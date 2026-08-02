@@ -45,9 +45,9 @@ class Spielerregister
 	 * @param bool  $newestImage False: alle Bilder zurückgeben; true: nur das
 	 *                           jüngste Bild (nach Zeitstempel der Datei)
 	 *
-	 * @return array|false Liste der Bilddaten, bei $newestImage ein einzelner
-	 *                     Bilddatensatz, oder false, wenn keine Bilder
-	 *                     hinterlegt sind bzw. keines erzeugt werden konnte
+	 * @return array<int|string, mixed>|false Liste der Bilddaten, bei $newestImage
+	 *                     ein einzelner Bilddatensatz, oder false, wenn keine
+	 *                     Bilder hinterlegt sind bzw. keines erzeugt werden konnte
 	 */
 	public static function Bilder($string, bool $newestImage = false)
 	{
@@ -144,8 +144,8 @@ class Spielerregister
 	 * @param int               $intTstamp Zeitstempel der Datei, wird für die Suche
 	 *                                     nach dem jüngsten Bild gebraucht
 	 *
-	 * @return array|null Die Bilddaten, oder null wenn die Datei fehlt oder sich
-	 *                    nicht in ein Bild umwandeln lässt
+	 * @return array<string, mixed>|null Die Bilddaten, oder null wenn die Datei
+	 *                    fehlt oder sich nicht in ein Bild umwandeln lässt
 	 */
 	protected static function erzeugeBild(string $strPath, $imageSize, int $intTstamp): ?array
 	{

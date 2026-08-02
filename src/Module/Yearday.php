@@ -17,6 +17,7 @@ use Contao\PageModel;
 use Schachbulle\ContaoHelperBundle\Classes\Helper as HelperBundle;
 use Schachbulle\ContaoSpielerregisterBundle\Classes\Bilder;
 use Schachbulle\ContaoSpielerregisterBundle\Classes\SpielerregisterModul;
+use Schachbulle\ContaoSpielerregisterBundle\Klassen\Helper;
 
 /**
  * Frontend-Modul "Aktueller Jahrestag".
@@ -59,7 +60,7 @@ class Yearday extends SpielerregisterModul
 		// Link auf die Übersichtsseite ("Mehr Jahrestage"); ohne eingestellte
 		// Weiterleitungsseite entfällt der Link im Template
 		$jumpTo = PageModel::findByPk($this->spielerregister_jumpTo);
-		$this->Template->mehrlink = null !== $jumpTo ? $jumpTo->getFrontendUrl() : '';
+		$this->Template->mehrlink = Helper::seitenUrl($jumpTo);
 
 		$daten = array();
 
@@ -132,7 +133,7 @@ class Yearday extends SpielerregisterModul
 	 * @param string     $bis         Ende des Zeitraums als JJJJMMTT
 	 * @param string     $sortierung  Datum des Jahrestags im Zeitraum als JJJJMMTT
 	 *
-	 * @return array Die Daten einer Zeile für das Template
+	 * @return array<string, mixed> Die Daten einer Zeile für das Template
 	 */
 	protected function erzeugeEintrag($objRegister, string $strTyp, $varStichtag, string $von, string $bis, string $sortierung): array
 	{

@@ -34,7 +34,7 @@ class Plugin implements BundlePluginInterface
 	 * @param ParserInterface $parser Vom Manager gestellter Parser; wird hier
 	 *                                nicht gebraucht, gehört aber zur Schnittstelle
 	 *
-	 * @return array Liste mit der Bundle-Beschreibung
+	 * @return array<int, \Contao\ManagerPlugin\Bundle\Config\ConfigInterface> Liste mit der Bundle-Beschreibung
 	 */
 	public function getBundles(ParserInterface $parser): array
 	{

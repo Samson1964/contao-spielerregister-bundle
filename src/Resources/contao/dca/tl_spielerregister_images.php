@@ -141,7 +141,16 @@ $GLOBALS['TL_DCA']['tl_spielerregister_images'] = array
  */
 if (ContaoSpielerregisterBundle::isContao5())
 {
-	$GLOBALS['TL_DCA']['tl_spielerregister_images']['list']['label']['label_callback'] = array('tl_spielerregister_images', 'listImagesLabel');
+	// Contao 5 setzt die Beschriftung erst aus den in "fields" genannten Spalten
+	// zusammen und reicht sie danach an das label_callback weiter. Fehlt "fields",
+	// ruft der Kern vsprintf('%s', array()) auf; das ist unter PHP 8 ein
+	// ValueError und die Bilderliste einer Person lässt sich gar nicht öffnen.
+	$GLOBALS['TL_DCA']['tl_spielerregister_images']['list']['label'] = array
+	(
+		'fields'                  => array('title'),
+		'format'                  => '%s',
+		'label_callback'          => array('tl_spielerregister_images', 'listImagesLabel')
+	);
 
 	$GLOBALS['TL_DCA']['tl_spielerregister_images']['list']['global_operations'] = array
 	(
@@ -227,10 +236,10 @@ class tl_spielerregister_images extends Backend
 	 * davon nur der Datensatz. Das ausgegebene HTML wird von Contao ungefiltert
 	 * übernommen, das Vorschaubild bleibt also erhalten.
 	 *
-	 * @param array       $arrRow   Der Datensatz aus tl_spielerregister_images
-	 * @param string      $strLabel Die von Contao vorbereitete Beschriftung
-	 * @param object|null $dc       Der aufrufende Data Container
-	 * @param array       $args     Die Werte der in "label.fields" genannten Spalten
+	 * @param array<string, mixed> $arrRow   Der Datensatz aus tl_spielerregister_images
+	 * @param string               $strLabel Die von Contao vorbereitete Beschriftung
+	 * @param object|null          $dc       Der aufrufende Data Container
+	 * @param array<int, mixed>    $args     Die Werte der in "label.fields" genannten Spalten
 	 *
 	 * @return string Das HTML der Zeile
 	 */
@@ -245,7 +254,7 @@ class tl_spielerregister_images extends Backend
 	 * Neben dem Vorschaubild werden Dateiname, Jahr, Bildrechte und Titel
 	 * angezeigt, damit sich die Fotos ohne Öffnen unterscheiden lassen.
 	 *
-	 * @param array $arrRow Der Datensatz aus tl_spielerregister_images
+	 * @param array<string, mixed> $arrRow Der Datensatz aus tl_spielerregister_images
 	 *
 	 * @return string Das HTML der Zeile; fehlt die Datei, wird nur der Hinweis
 	 *                auf die fehlende Datei ausgegeben

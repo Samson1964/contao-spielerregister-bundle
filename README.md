@@ -25,8 +25,8 @@ Inhaltselement, drei Insert-Tags und zwei Cronjobs für den Newsletterversand.
 
 | | |
 |---|---|
-| Contao | 4.13 LTS oder 5.x |
-| PHP | 7.4 oder 8.x |
+| Contao | 4.13 LTS oder 5.x (geprüft mit 4.13.58 und 5.7.7) |
+| PHP | 7.4 oder 8.x (geprüft mit 8.3) |
 | Weitere Erweiterungen | `contao/newsletter-bundle`, `menatwork/contao-multicolumnwizard-bundle`, `schachbulle/contao-helper-bundle` |
 
 Die Abhängigkeiten installiert Composer automatisch mit.
@@ -404,5 +404,14 @@ vendor/bin/phpunit
 Die Testsuite lädt die Klassen bei Bedarf über einen eigenen Autoloader in
 `tests/bootstrap.php` und läuft deshalb auch ohne installiertes
 `vendor`-Verzeichnis mit einem eigenständigen PHPUnit 9.
+
+Der übrige Code lässt sich nur im laufenden Contao prüfen. Dafür wird die
+Erweiterung in je eine Testinstallation von Contao 4.13 und Contao 5 eingebunden
+und dort werden alle Frontend-Module (mit jeder Einstellungsvariante), das
+Inhaltselement, die Insert-Tags, die Backend-Listen samt Bearbeitungsmaske, der
+erweiterte Filter, der CSV-Export und die beiden Cronjobs aufgerufen. Ein
+Fehler-Handler, der nur Meldungen aus dem Verzeichnis der Erweiterung
+durchlässt, macht Warnungen und Verfallsmeldungen dabei sichtbar; alles andere
+wäre im Grundrauschen von Contao und Symfony nicht zu finden.
 
 **Frank Hoppe**

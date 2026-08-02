@@ -19,6 +19,7 @@ use Contao\System;
 use Schachbulle\ContaoSpielerregisterBundle\Classes\Bilder;
 use Schachbulle\ContaoSpielerregisterBundle\ContaoSpielerregisterBundle;
 use Schachbulle\ContaoSpielerregisterBundle\Klassen\Helper;
+use Symfony\Component\HttpFoundation\Session\Attribute\AttributeBagInterface;
 
 /**
  * Tabelle tl_spielerregister
@@ -892,12 +893,12 @@ class tl_spielerregister extends Backend
 	 * Geburts- und Sterbetag stehen in der Datenbank als Zahl JJJJMMTT und
 	 * werden hier in die deutsche Schreibweise gebracht.
 	 *
-	 * @param array         $row   Der komplette Datensatz
-	 * @param string        $label Die von Contao vorbereitete Beschriftung
-	 * @param DataContainer $dc    Der aufrufende Data Container
-	 * @param array         $args  Die Werte der in "label.fields" genannten Spalten
+	 * @param array<string, mixed> $row   Der komplette Datensatz
+	 * @param string               $label Die von Contao vorbereitete Beschriftung
+	 * @param DataContainer        $dc    Der aufrufende Data Container
+	 * @param array<int, mixed>    $args  Die Werte der in "label.fields" genannten Spalten
 	 *
-	 * @return array Die Spaltenwerte für die Ausgabe
+	 * @return array<int, mixed> Die Spaltenwerte für die Ausgabe
 	 */
 	public function listRecords($row, $label, DataContainer $dc, $args)
 	{
@@ -1294,9 +1295,14 @@ class tl_spielerregister extends Backend
 	 * nichts zu merken; die Rückgabe ist dann null und die Filterfunktionen
 	 * arbeiten ohne gespeicherte Auswahl weiter.
 	 *
-	 * @return \Symfony\Component\HttpFoundation\Session\SessionBagInterface|null
+	 * Contao legt den Behälter als ArrayAttributeBag an. Die allgemeine
+	 * Schnittstelle SessionBagInterface kennt weder get() noch set(), deshalb
+	 * wird hier ausdrücklich auf AttributeBagInterface geprüft – sonst hinge der
+	 * Zugriff daran, dass Contao den Behältertyp nie ändert.
+	 *
+	 * @return AttributeBagInterface|null Der Behälter, oder null ohne Sitzung
 	 */
-	private static function getSessionBag()
+	private static function getSessionBag(): ?AttributeBagInterface
 	{
 		$request = System::getContainer()->get('request_stack')->getCurrentRequest();
 
@@ -1305,6 +1311,8 @@ class tl_spielerregister extends Backend
 			return null;
 		}
 
-		return $request->getSession()->getBag('contao_backend');
+		$objBag = $request->getSession()->getBag('contao_backend');
+
+		return $objBag instanceof AttributeBagInterface ? $objBag : null;
 	}
 }

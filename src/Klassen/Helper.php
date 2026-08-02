@@ -15,7 +15,9 @@ use Contao\Config;
 use Contao\Database;
 use Contao\PageModel;
 use Contao\StringUtil;
+use Contao\System;
 use Schachbulle\ContaoSpielerregisterBundle\Classes\Datum;
+use Symfony\Component\Routing\Exception\ExceptionInterface as RoutingException;
 
 /**
  * Sammlung von Hilfsfunktionen rund um das Spielerregister.
@@ -62,8 +64,10 @@ class Helper
 			{
 				$lebensdaten = '(* '.$gebDatum.')';
 			}
-			elseif (!$gebDatum && $totDatum)
+			elseif ($totDatum)
 			{
+				// Hier ist der Geburtstag zwangsläufig unbekannt, sonst hätte
+				// schon einer der beiden Zweige darüber gegriffen
 				$lebensdaten = '(* ?, &dagger; '.$totDatum.')';
 			}
 			else
@@ -196,14 +200,49 @@ class Helper
 			return '';
 		}
 
-		$objPage = PageModel::findByPk($intPage);
+		return self::seitenUrl(PageModel::findByPk($intPage), '/player/'.$id);
+	}
 
+	/**
+	 * Erzeugt die Frontend-URL einer Seite, wahlweise mit angehängten Parametern.
+	 *
+	 * Contao 5.3 hat PageModel::getFrontendUrl() für veraltet erklärt; ab Contao 6
+	 * gibt es die Methode nicht mehr. Zuständig ist dort der Dienst
+	 * contao.routing.content_url_generator, den Contao 4.13 noch nicht kennt.
+	 * Deshalb wird der Dienst benutzt, wenn er vorhanden ist, und sonst der alte
+	 * Weg gegangen. Alle Stellen des Bundles, die eine Seiten-URL brauchen, laufen
+	 * über diese Methode, damit die Fallunterscheidung nur einmal im Code steht.
+	 *
+	 * @param PageModel|null $objPage      Die Zielseite, null ergibt einen leeren String
+	 * @param string         $strParameter Anzuhängende Parameter, etwa "/player/17";
+	 *                                     leer lassen für die Seite selbst
+	 *
+	 * @return string Die URL ohne Domain, oder ein leerer String, wenn die Seite
+	 *                fehlt oder sich zu keiner Route auflösen lässt (etwa weil sie
+	 *                unveröffentlicht ist oder in einem Wurzelknoten ohne Startpunkt hängt)
+	 */
+	public static function seitenUrl(?PageModel $objPage, string $strParameter = ''): string
+	{
 		if (null === $objPage)
 		{
 			return '';
 		}
 
-		return $objPage->getFrontendUrl('/player/'.$id);
+		$container = System::getContainer();
+
+		if ($container->has('contao.routing.content_url_generator'))
+		{
+			try
+			{
+				return $container->get('contao.routing.content_url_generator')->generate($objPage, '' !== $strParameter ? array('parameters' => $strParameter) : array());
+			}
+			catch (RoutingException $e)
+			{
+				return ''; // Seite ist nicht erreichbar, dann lieber kein Link als ein toter
+			}
+		}
+
+		return $objPage->getFrontendUrl('' !== $strParameter ? $strParameter : null);
 	}
 
 	/**
