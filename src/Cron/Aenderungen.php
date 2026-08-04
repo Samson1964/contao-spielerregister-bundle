@@ -98,6 +98,24 @@ class Aenderungen
 			return; // Niemand im Verteiler
 		}
 
+		// Unbrauchbare Adressen aussortieren, bevor sie in die Blindkopie
+		// wandern: Alle Empfänger stehen in EINER Nachricht, eine einzige
+		// fehlerhafte Adresse ließe sonst niemanden etwas bekommen
+		$arrVerworfen = array_values(array_filter($arrEmpfaenger, static fn ($a) => !filter_var($a, FILTER_VALIDATE_EMAIL)));
+		$arrEmpfaenger = array_values(array_filter($arrEmpfaenger, static fn ($a) => (bool) filter_var($a, FILTER_VALIDATE_EMAIL)));
+
+		if ($arrVerworfen)
+		{
+			$this->log('error', sprintf('Unbrauchbare Empfängeradressen im Verteiler übergangen: %s', implode(', ', $arrVerworfen)));
+		}
+
+		if (!$arrEmpfaenger)
+		{
+			$this->log('error', 'Newsletter über neue Einträge übersprungen: Im Verteiler steht keine brauchbare Adresse.');
+
+			return;
+		}
+
 		$strName = trim((string) Config::get('spielerregister_mailAbsendername'));
 		$strFuss = (string) Config::get('spielerregister_mailFuss');
 
@@ -105,20 +123,33 @@ class Aenderungen
 		$content .= '<p>Folgende Personen wurden <b>neu</b> in unsere Datenbank aufgenommen:</p>'.$strAusgabe;
 		$content .= $strFuss;
 
-		$objEmail = new Email();
-		$objEmail->from = $strAbsender;
-		$objEmail->charset = 'utf-8';
-		$objEmail->subject = 'Spielerregister - Neue Einträge';
-		$objEmail->html = $content;
-
-		if ('' !== $strName)
+		// Der gesamte Mailaufbau steht in der Fehlerbehandlung, nicht nur das
+		// Absenden: Contao\Email prüft die Adressen bereits in sendBcc(). Ohne
+		// diese Klammer riss eine unbrauchbare Adresse den ganzen Cronjob mit,
+		// und zwar unbemerkt, weil niemand dabei zusieht
+		try
 		{
-			$objEmail->fromName = $strName;
-		}
+			$objEmail = new Email();
+			$objEmail->from = $strAbsender;
+			$objEmail->charset = 'utf-8';
+			$objEmail->subject = 'Spielerregister - Neue Einträge';
+			$objEmail->html = $content;
 
-		// An den Absender adressiert, alle Empfänger stehen in Blindkopie
-		$objEmail->sendBcc($arrEmpfaenger);
-		$objEmail->sendTo($strAbsender);
+			if ('' !== $strName)
+			{
+				$objEmail->fromName = $strName;
+			}
+
+			// An den Absender adressiert, alle Empfänger stehen in Blindkopie
+			$objEmail->sendBcc($arrEmpfaenger);
+			$objEmail->sendTo($strAbsender);
+		}
+		catch (\Throwable $e)
+		{
+			$this->log('error', sprintf('Newsletter über neue Einträge konnte nicht verschickt werden: %s', $e->getMessage()));
+
+			return;
+		}
 
 		$this->log('info', sprintf('Newsletter über neue Einträge an %d Empfänger versendet', \count($arrEmpfaenger)));
 	}

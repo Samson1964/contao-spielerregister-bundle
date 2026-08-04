@@ -1,5 +1,20 @@
 # DSB-Spielerregister Changelog
 
+## Version 3.0.2 (2026-08-04)
+
+* Fix: **Eine unbrauchbare Adresse im Newsletter-Verteiler ließ beide Cronjobs
+  abbrechen** — unbemerkt, weil dabei niemand zusieht. `Contao\Email` prüft die
+  Adressen und wirft eine Ausnahme; der Versand stand aber außerhalb einer
+  Fehlerbehandlung.
+  * Beim **Jahrestags-Newsletter** ging je Empfänger eine eigene Nachricht
+    hinaus. Ein Fehler kostet jetzt nur noch diese eine Mail; alle folgenden
+    Empfänger bekommen ihre wie gewohnt.
+  * Beim **Newsletter über neue Einträge** stehen alle Empfänger in einer
+    einzigen Blindkopie. Unbrauchbare Adressen werden deshalb vorher
+    aussortiert, damit sie nicht allen anderen die Nachricht verhageln.
+* Change: Übergangene Adressen erscheinen mit Klartext im Systemprotokoll,
+  damit der Fehler im Verteiler auffindbar ist
+
 ## Version 3.0.1 (2026-08-02)
 
 Geprüft mit PHP 8.3 gegen Contao 4.13.58 und Contao 5.7.7, jeweils mit dem

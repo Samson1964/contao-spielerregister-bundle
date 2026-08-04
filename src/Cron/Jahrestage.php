@@ -314,18 +314,32 @@ class Jahrestage
 				$text = str_replace(array('"files/', '"index.php/'), array('"'.$strBasis.'/files/', '"'.$strBasis.'/'), $text);
 			}
 
-			$objEmail = new Email();
-			$objEmail->from = $strAbsender;
-			$objEmail->charset = 'utf-8';
-			$objEmail->subject = $strBetreff;
-			$objEmail->html = $text;
-
-			if ('' !== $strName)
+			// Fehlerbehandlung je Empfänger: Hier geht eine eigene Nachricht
+			// an jede Adresse, deshalb darf eine unbrauchbare Adresse nur
+			// diese eine Mail kosten. Ohne die Klammer brach der Cronjob ab
+			// und alle folgenden Empfänger gingen leer aus — unbemerkt, weil
+			// niemand dabei zusieht
+			try
 			{
-				$objEmail->fromName = $strName;
-			}
+				$objEmail = new Email();
+				$objEmail->from = $strAbsender;
+				$objEmail->charset = 'utf-8';
+				$objEmail->subject = $strBetreff;
+				$objEmail->html = $text;
 
-			$objEmail->sendTo($adresse);
+				if ('' !== $strName)
+				{
+					$objEmail->fromName = $strName;
+				}
+
+				$objEmail->sendTo($adresse);
+			}
+			catch (\Throwable $e)
+			{
+				$this->log('error', sprintf('Jahrestage-Mail an %s konnte nicht verschickt werden: %s', $adresse, $e->getMessage()));
+
+				continue;
+			}
 
 			// Versandzeit in Datenbank eintragen
 			Database::getInstance()
