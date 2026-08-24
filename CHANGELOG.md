@@ -1,5 +1,19 @@
 # DSB-Spielerregister Changelog
 
+## Version 3.1.1 (2026-08-24)
+
+* Fix: Das Formular des CSV-Imports war unformatiert – Trennzeichen und
+  Quelldatei hingen am linken Rand. Ursache war rohes, selbst
+  zusammengesetztes HTML ohne die Contao-eigenen Klassen
+  `fieldset.tl_tbox`/`div.widget.w50`/`div.widget.clr`, von denen das
+  Backend-Stylesheet die Einrückung und den Zeilenumbruch der Felder ableitet.
+  Ersetzt durch eine echte Vorlage
+  (`Resources/contao/templates/be_spielerregister_import.html5`), deren
+  Feldstruktur wörtlich dem Kern-Template `be_csv_import.html5` entspricht
+  (identisch in Contao 4.13 und 5). Im Browser gegen die Referenzseite
+  `tl_newsletter_recipients` (`contao/newsletter-bundle`) verglichen: Position
+  und Fließverhalten der Felder stimmen jetzt exakt überein.
+
 ## Version 3.1.0 (2026-08-24)
 
 * Add: **CSV-Import** über die neue Schaltfläche in der Übersicht (key=import,

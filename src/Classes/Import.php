@@ -12,6 +12,7 @@ declare(strict_types=1);
 namespace Schachbulle\ContaoSpielerregisterBundle\Classes;
 
 use Contao\Backend;
+use Contao\BackendTemplate;
 use Contao\Config;
 use Contao\Database;
 use Contao\DataContainer;
@@ -20,7 +21,6 @@ use Contao\File;
 use Contao\FileUpload;
 use Contao\Input;
 use Contao\Message;
-use Contao\StringUtil;
 use Contao\System;
 use Schachbulle\ContaoSpielerregisterBundle\Klassen\Helper;
 
@@ -325,6 +325,11 @@ class Import extends Backend
 	/**
 	 * Erzeugt das Upload-Formular für den Import.
 	 *
+	 * Die Feldstruktur (fieldset.tl_tbox + div.widget) entspricht wörtlich dem
+	 * Kern-Template be_csv_import.html5 (identisch in Contao 4.13 und 5): Ohne
+	 * diese Klassen greift das Backend-Stylesheet nicht, Trennzeichen und
+	 * Quelldatei hängen dann unformatiert am linken Rand.
+	 *
 	 * @param FileUpload $objUploader
 	 *
 	 * @return string Das fertige HTML der Backend-Seite
@@ -334,42 +339,27 @@ class Import extends Backend
 		// Request-Token über den Service holen
 		// (die Konstante REQUEST_TOKEN existiert in Contao 5 nicht mehr)
 		$strToken = System::getContainer()->get('contao.csrf.token_manager')->getDefaultTokenValue();
-		$strBack = StringUtil::ampersand(str_replace('&key=import', '', Environment::get('request')));
-		$strSpalten = implode(', ', array_keys(self::SPALTEN));
 
-		return '
-<div id="tl_buttons">
-<a href="'.$strBack.'" class="header_back" title="'.StringUtil::specialchars($GLOBALS['TL_LANG']['MSC']['backBTTitle'] ?? '').'" accesskey="b">'.($GLOBALS['TL_LANG']['MSC']['backBT'] ?? 'Zurück').'</a>
-</div>
+		$objTemplate = new BackendTemplate('be_spielerregister_import');
+		$objTemplate->headline = $GLOBALS['TL_LANG']['MSC']['tw_import'][1] ?? 'CSV-Import';
+		$objTemplate->backUrl = str_replace('&key=import', '', Environment::get('request'));
+		$objTemplate->backBT = $GLOBALS['TL_LANG']['MSC']['backBT'] ?? 'Zurück';
+		$objTemplate->backBTTitle = $GLOBALS['TL_LANG']['MSC']['backBTTitle'] ?? '';
+		$objTemplate->action = Environment::get('request');
+		$objTemplate->requestToken = $strToken;
+		$objTemplate->fileMaxSize = Config::get('maxFileSize');
+		$objTemplate->separatorLabel = $GLOBALS['TL_LANG']['MSC']['separator'][0] ?? 'Trennzeichen';
+		$objTemplate->separators = array
+		(
+			array('value' => 'comma', 'label' => $GLOBALS['TL_LANG']['MSC']['comma'] ?? 'Komma'),
+			array('value' => 'semicolon', 'label' => $GLOBALS['TL_LANG']['MSC']['semicolon'] ?? 'Semikolon'),
+			array('value' => 'tabulator', 'label' => $GLOBALS['TL_LANG']['MSC']['tabulator'] ?? 'Tabulator'),
+		);
+		$objTemplate->sourceLabel = $GLOBALS['TL_LANG']['MSC']['source'][0] ?? 'Quelldatei';
+		$objTemplate->uploader = $objUploader->generateMarkup();
+		$objTemplate->spaltenHelp = 'Die erste Zeile muss die Spaltennamen enthalten, die Reihenfolge ist beliebig. Erkannt werden: '.implode(', ', array_keys(self::SPALTEN)).'. Fotos und Weblinks lassen sich nicht importieren, dafür bitte die Person nach dem Import im Backend öffnen. Existiert bereits eine Person mit demselben Vor- und Nachnamen, wird die Zeile übersprungen.';
+		$objTemplate->submitLabel = $GLOBALS['TL_LANG']['MSC']['tw_import'][0] ?? 'Importieren';
 
-<h2 class="sub_headline">'.($GLOBALS['TL_LANG']['MSC']['tw_import'][1] ?? 'CSV-Import').'</h2>
-'.Message::generate().'
-<form action="'.StringUtil::ampersand(Environment::get('request')).'" id="tl_table_import" class="tl_form" method="post" enctype="multipart/form-data">
-<div class="tl_formbody_edit">
-<input type="hidden" name="FORM_SUBMIT" value="tl_table_import">
-<input type="hidden" name="REQUEST_TOKEN" value="'.$strToken.'">
-<input type="hidden" name="MAX_FILE_SIZE" value="'.Config::get('maxFileSize').'">
-
-<div class="tl_tbox">
-  <h3><label for="separator">'.($GLOBALS['TL_LANG']['MSC']['separator'][0] ?? 'Trennzeichen').'</label></h3>
-  <select name="separator" id="separator" class="tl_select" onfocus="Backend.getScrollOffset()">
-    <option value="comma">'.($GLOBALS['TL_LANG']['MSC']['comma'] ?? 'Komma').'</option>
-    <option value="semicolon">'.($GLOBALS['TL_LANG']['MSC']['semicolon'] ?? 'Semikolon').'</option>
-    <option value="tabulator">'.($GLOBALS['TL_LANG']['MSC']['tabulator'] ?? 'Tabulator').'</option>
-  </select>
-  <h3>'.($GLOBALS['TL_LANG']['MSC']['source'][0] ?? 'Quelldatei').'</h3>'.$objUploader->generateMarkup().'
-  <p class="tl_help tl_tip">Die erste Zeile muss die Spaltennamen enthalten, die Reihenfolge ist beliebig. Erkannt werden: '.$strSpalten.'. Fotos und Weblinks lassen sich nicht importieren, dafür bitte die Person nach dem Import im Backend öffnen. Existiert bereits eine Person mit demselben Vor- und Nachnamen, wird die Zeile übersprungen.</p>
-</div>
-
-</div>
-
-<div class="tl_formbody_submit">
-
-<div class="tl_submit_container">
-  <input type="submit" name="save" id="save" class="tl_submit" accesskey="s" value="'.StringUtil::specialchars($GLOBALS['TL_LANG']['MSC']['tw_import'][0] ?? 'Importieren').'">
-</div>
-
-</div>
-</form>';
+		return $objTemplate->parse();
 	}
 }
