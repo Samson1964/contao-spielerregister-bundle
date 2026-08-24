@@ -1,5 +1,20 @@
 # DSB-Spielerregister Changelog
 
+## Version 3.1.0 (2026-08-24)
+
+* Add: **CSV-Import** über die neue Schaltfläche in der Übersicht (key=import,
+  `Classes/Import.php`). Erkannt werden alle Felder außer den Fotos und den
+  Weblinks (Spalte `links`), da beide als verschachtelte Daten in einer
+  flachen CSV-Zeile nicht sinnvoll abzubilden sind. Existiert bereits eine
+  Person mit demselben Vor- und Nachnamen, wird die Zeile übersprungen; am
+  Ende steht je Datei eine Meldung mit der Anzahl importierter Personen sowie
+  den übersprungenen bzw. fehlgeschlagenen Zeilen. Details siehe README,
+  Abschnitt „CSV-Import".
+* Change: Die Erzeugung des Alias (`Helper::erzeugeAlias()`) steht jetzt an
+  einer Stelle und wird sowohl beim manuellen Speichern im Backend als auch
+  vom CSV-Import benutzt, der ohne den Data Container direkt in die Datenbank
+  schreibt.
+
 ## Version 3.0.2 (2026-08-04)
 
 * Fix: **Eine unbrauchbare Adresse im Newsletter-Verteiler ließ beide Cronjobs

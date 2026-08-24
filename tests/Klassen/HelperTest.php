@@ -17,9 +17,9 @@ use Schachbulle\ContaoSpielerregisterBundle\Klassen\Helper;
 /**
  * Prüft die Hilfsfunktionen, die ohne Contao auskommen.
  *
- * Nicht geprüft werden getRegister(), getPlayerlink() und getLinks(): Sie
- * greifen auf Datenbank, Seitenstruktur bzw. Contao-Klassen zu und brauchen
- * dafür eine laufende Contao-Installation.
+ * Nicht geprüft werden getRegister(), getPlayerlink(), getLinks(), seitenUrl()
+ * und erzeugeAlias(): Sie greifen auf Datenbank, Seitenstruktur bzw. andere
+ * Contao-Klassen zu und brauchen dafür eine laufende Contao-Installation.
  */
 class HelperTest extends TestCase
 {
@@ -90,5 +90,51 @@ class HelperTest extends TestCase
 	public function testGetLebensdatenOhneAngaben(): void
 	{
 		$this->assertSame('', Helper::getLebensdaten(0, '', '', 0, ''));
+	}
+
+	public function testWandleImportwertText(): void
+	{
+		$this->assertSame('Lasker', Helper::wandleImportwert('text', '  Lasker  '));
+		$this->assertSame('', Helper::wandleImportwert('text', ''));
+	}
+
+	public function testWandleImportwertDatum(): void
+	{
+		// Dieselbe Regel wie im Backend-Formular, siehe Helper::putDate()
+		$this->assertSame('18681224', Helper::wandleImportwert('datum', '24.12.1868'));
+		$this->assertSame(0, Helper::wandleImportwert('datum', 'irgendwann'));
+	}
+
+	public function testWandleImportwertCheckbox(): void
+	{
+		// Jeder nicht-leere, nicht-"0"-Wert gilt als angehakt – so lassen sich
+		// in der Tabellenkalkulation gängige Markierungen wie "x" oder "ja"
+		// benutzen, ohne dass exakt "1" eingetragen werden muss
+		$this->assertSame('1', Helper::wandleImportwert('checkbox', '1'));
+		$this->assertSame('1', Helper::wandleImportwert('checkbox', 'x'));
+		$this->assertSame('1', Helper::wandleImportwert('checkbox', 'ja'));
+		$this->assertSame('', Helper::wandleImportwert('checkbox', ''));
+		$this->assertSame('', Helper::wandleImportwert('checkbox', '0'));
+		$this->assertSame('', Helper::wandleImportwert('checkbox', '  '));
+	}
+
+	public function testWandleImportwertZahl(): void
+	{
+		$this->assertSame(1928, Helper::wandleImportwert('zahl', '1928'));
+		$this->assertSame(0, Helper::wandleImportwert('zahl', ''));
+		$this->assertSame(0, Helper::wandleImportwert('zahl', 'keine Zahl'));
+	}
+
+	public function testWandleImportwertBedeutung(): void
+	{
+		$this->assertSame(7, Helper::wandleImportwert('bedeutung', '7'));
+
+		// Vorgabewert wie im Auswahlfeld des Backends
+		$this->assertSame(5, Helper::wandleImportwert('bedeutung', ''));
+
+		// Werte außerhalb von 1 bis 10 werden auf den gültigen Bereich begrenzt,
+		// damit eine falsche CSV-Eingabe nicht in der Datenbank landet
+		$this->assertSame(10, Helper::wandleImportwert('bedeutung', '99'));
+		$this->assertSame(1, Helper::wandleImportwert('bedeutung', '-3'));
 	}
 }

@@ -150,6 +150,91 @@ class Helper
 	}
 
 	/**
+	 * Wandelt eine rohe CSV-Zelle des CSV-Imports in den passenden Datenbankwert um.
+	 *
+	 * Wird von Classes/Import.php benutzt. Der Typ legt fest, wie die Zelle zu
+	 * lesen ist:
+	 *
+	 * - "text": unverändert, nur getrimmt
+	 * - "datum": über putDate() in die Speicherform JJJJMMTT
+	 * - "checkbox": jeder nicht-leere, nicht-"0"-Wert gilt als angehakt ("1"),
+	 *   sonst nicht angehakt ("") — so lassen sich in der Tabellenkalkulation
+	 *   gängige Markierungen wie "x" oder "ja" verwenden
+	 * - "zahl": als Ganzzahl, eine leere Zelle ergibt 0
+	 * - "bedeutung": als Ganzzahl zwischen 1 und 10; eine leere oder
+	 *   ungültige Zelle ergibt den Vorgabewert 5, wie das Auswahlfeld im Backend
+	 *
+	 * @param string $strTyp  Einer der oben genannten Typnamen
+	 * @param string $strWert Die Zelle aus der CSV-Datei, roh
+	 *
+	 * @return string|int Der Wert in der Form, die tl_spielerregister erwartet
+	 */
+	public static function wandleImportwert(string $strTyp, string $strWert)
+	{
+		$strWert = trim($strWert);
+
+		switch ($strTyp)
+		{
+			case 'datum':
+				return self::putDate($strWert);
+
+			case 'checkbox':
+				return ('' !== $strWert && '0' !== $strWert) ? '1' : '';
+
+			case 'zahl':
+				return '' === $strWert ? 0 : (int) $strWert;
+
+			case 'bedeutung':
+				$intWert = '' === $strWert ? 5 : (int) $strWert;
+
+				return max(1, min(10, $intWert));
+
+			default:
+				return $strWert;
+		}
+	}
+
+	/**
+	 * Erzeugt das Alias einer Person aus ihren Namen.
+	 *
+	 * Zusammengesetzt wird aus dem Nachname und, falls vorhanden, allen
+	 * weiteren Nach- und Vornamen, getrennt durch Bindestriche. Umlaute werden
+	 * ersetzt, weil das Alias seit jeher Bestandteil der Frontend-URLs ist und
+	 * dort umlautfrei bleiben soll.
+	 *
+	 * Die Methode wird sowohl vom onsubmit_callback der DCA (beim Speichern
+	 * eines einzelnen Datensatzes im Backend) als auch vom CSV-Import benutzt,
+	 * der ohne den Umweg über den Data Container direkt in die Datenbank
+	 * schreibt und das Alias deshalb selbst erzeugen muss.
+	 *
+	 * @param array<string, mixed> $arrPerson Assoziatives Array mit den
+	 *                                        Schlüsseln surname1 (Pflicht) und
+	 *                                        wahlweise surname2, surname3,
+	 *                                        surname4, firstname1, firstname2,
+	 *                                        firstname3, firstname4; fehlende
+	 *                                        Schlüssel gelten als leer
+	 *
+	 * @return string Das fertige Alias
+	 */
+	public static function erzeugeAlias(array $arrPerson): string
+	{
+		static $suchen = array('Ä', 'Ö', 'Ü', 'ß', 'é', 'ä', 'ö', 'ü');
+		static $ersetzen = array('ae', 'oe', 'ue', 'ss', 'e', 'ae', 'oe', 'ue');
+
+		$temp = (string) ($arrPerson['surname1'] ?? '');
+
+		foreach (array('surname2', 'surname3', 'surname4', 'firstname1', 'firstname2', 'firstname3', 'firstname4') as $strFeld)
+		{
+			if (!empty($arrPerson[$strFeld]))
+			{
+				$temp .= '-'.$arrPerson[$strFeld];
+			}
+		}
+
+		return str_replace($suchen, $ersetzen, StringUtil::generateAlias($temp));
+	}
+
+	/**
 	 * Prüft, ob ein Wert ausschließlich aus Ziffern besteht.
 	 *
 	 * Anders als is_numeric() sind weder Vorzeichen noch Dezimaltrenner noch

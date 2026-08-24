@@ -787,11 +787,21 @@ $GLOBALS['TL_DCA']['tl_spielerregister'] = array
  * vollständige Arrays. Der Schnellschalter läuft in beiden Versionen über das
  * Contao-eigene "act=toggle"; die frühere Umsetzung über codefog/contao-haste
  * ist entfallen, weil Haste nicht für Contao 5 verfügbar ist.
+ *
+ * Für "import" reicht die CSS-Klasse "header_css_import" ohne eigenes Icon: Sie
+ * ist im Contao-Kern fest hinterlegt (siehe contao/newsletter-bundle, das
+ * dieselbe Klasse für tl_newsletter_recipients benutzt) und liefert das
+ * passende Symbol in beiden Contao-Versionen von selbst.
  */
 if (ContaoSpielerregisterBundle::isContao5())
 {
 	$GLOBALS['TL_DCA']['tl_spielerregister']['list']['global_operations'] = array
 	(
+		'import' => array
+		(
+			'href'                => 'key=import',
+			'class'               => 'header_css_import'
+		),
 		'export' => array
 		(
 			'href'                => 'key=export',
@@ -819,6 +829,13 @@ else
 {
 	$GLOBALS['TL_DCA']['tl_spielerregister']['list']['global_operations'] = array
 	(
+		'import' => array
+		(
+			'label'               => &$GLOBALS['TL_LANG']['tl_spielerregister']['import'],
+			'href'                => 'key=import',
+			'class'               => 'header_css_import',
+			'attributes'          => 'onclick="Backend.getScrollOffset()"'
+		),
 		'export' => array
 		(
 			'label'               => &$GLOBALS['TL_LANG']['tl_spielerregister']['export'],
@@ -911,10 +928,10 @@ class tl_spielerregister extends Backend
 	/**
 	 * Erzeugt beim Speichern automatisch das Alias aus allen Namen.
 	 *
-	 * Zusammengesetzt wird aus allen vier Nach- und Vornamen, getrennt durch
-	 * Bindestriche. Umlaute werden vorher ersetzt: Contao selbst tut das seit
-	 * Version 4.4 nicht mehr zwingend, im Register sind die Aliasse aber seit
-	 * jeher umlautfrei und dienen als Bestandteil der URLs.
+	 * Die eigentliche Zusammensetzung übernimmt Helper::erzeugeAlias(), damit
+	 * der CSV-Import (Classes/Import.php) dieselbe Regel benutzt – er schreibt
+	 * ohne den Umweg über den Data Container direkt in die Datenbank und muss
+	 * das Alias deshalb ebenfalls selbst erzeugen.
 	 *
 	 * Das Alias wird direkt per SQL geschrieben und nicht über den Data
 	 * Container, weil es kein Eingabefeld der Palette ist.
@@ -925,29 +942,21 @@ class tl_spielerregister extends Backend
 	 */
 	public function generateAlias(DataContainer $dc)
 	{
-		static $suchen = array('Ä', 'Ö', 'Ü', 'ß', 'é', 'ä', 'ö', 'ü');
-		static $ersetzen = array('ae', 'oe', 'ue', 'ss', 'e', 'ae', 'oe', 'ue');
-
 		if (null === $dc->activeRecord)
 		{
 			return;
 		}
 
-		$temp = $dc->activeRecord->surname1;
+		$arrPerson = array();
 
-		foreach (array('surname2', 'surname3', 'surname4', 'firstname1', 'firstname2', 'firstname3', 'firstname4') as $strFeld)
+		foreach (array('surname1', 'surname2', 'surname3', 'surname4', 'firstname1', 'firstname2', 'firstname3', 'firstname4') as $strFeld)
 		{
-			if ($dc->activeRecord->$strFeld)
-			{
-				$temp .= '-'.$dc->activeRecord->$strFeld;
-			}
+			$arrPerson[$strFeld] = $dc->activeRecord->$strFeld;
 		}
-
-		$temp = str_replace($suchen, $ersetzen, StringUtil::generateAlias($temp));
 
 		Database::getInstance()
 			->prepare("UPDATE tl_spielerregister SET alias=? WHERE id=?")
-			->execute($temp, $dc->id);
+			->execute(Helper::erzeugeAlias($arrPerson), $dc->id);
 	}
 
 	/**

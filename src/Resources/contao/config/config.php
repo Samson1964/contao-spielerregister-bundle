@@ -10,6 +10,7 @@ declare(strict_types=1);
  */
 
 use Contao\ArrayUtil;
+use Schachbulle\ContaoSpielerregisterBundle\Classes\Import;
 use Schachbulle\ContaoSpielerregisterBundle\Classes\Tags;
 use Schachbulle\ContaoSpielerregisterBundle\ContentElements\Person;
 use Schachbulle\ContaoSpielerregisterBundle\Klassen\Spielerregister;
@@ -48,6 +49,7 @@ ArrayUtil::arrayInsert($GLOBALS['BE_MOD']['content'], 1, array
 	(
 		'tables'         => array('tl_spielerregister', 'tl_spielerregister_images'),
 		'icon'           => 'bundles/contaospielerregister/images/icon.png',
+		'import'         => array(Import::class, 'importSpieler'),
 		'export'         => array(Export::class, 'exportSpieler')
 	)
 ));

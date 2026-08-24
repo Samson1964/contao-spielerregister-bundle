@@ -168,6 +168,44 @@ aufdeckt. Die Auswahl bleibt in der Sitzung erhalten, bis sie zurückgesetzt wir
 | Kurzinfo fehlt | … ohne Kurzinfo |
 | Vorname fehlt | … ohne Vornamen |
 
+### CSV-Import
+
+Die Schaltfläche **CSV-Import** über der Liste öffnet ein Formular für den
+Upload einer CSV-Datei. Die erste Zeile muss die Spaltennamen enthalten, die
+Reihenfolge der Spalten ist beliebig; nicht erkannte Spalten werden ignoriert.
+Importiert werden alle Felder außer den Fotos (`multiSRC` und die Fototabelle)
+und den Weblinks (Spalte `links`) – beide stehen als verschachtelte Daten in
+der Datenbank und lassen sich in einer flachen CSV-Zeile nicht sinnvoll
+abbilden; sie werden nach dem Import manuell im Backend ergänzt.
+
+**Erkannte Spalten:** `title`, `surname1` (Pflicht), `firstname1`, `surname2`,
+`firstname2`, `surname3`, `firstname3`, `surname4`, `firstname4`, `birthday`,
+`birthday_alt`, `birthplace`, `deathday`, `deathday_alt`, `deathplace`,
+`death`, `hideLifedata`, `shortinfo`, `longinfo`, `wikipedia`, `fide_id`,
+`dewis_id`, `chessgames_id`, `chess365_id`, `chess_id`, `homepage`,
+`importance`, `gm_title`, `gm_date`, `im_title`, `im_date`, `wgm_title`,
+`wgm_date`, `wim_title`, `wim_date`, `honorpresident`, `honormember`,
+`honorgoldpin`, `honorsilverpin`, `honorgoldbadge`, `honorsilverbadge`,
+`honorletter`, `honorplate`, `honormedal`, `intern`, `nohighlighting`,
+`active`.
+
+**Datumsangaben** werden wie im Eingabeformular als `TT.MM.JJJJ`, `MM.JJJJ`
+oder `JJJJ` erwartet. **Kontrollkästchen** (`death`, `hideLifedata`, die vier
+FIDE-Titel, `nohighlighting`, `active`) gelten bei jedem nicht-leeren,
+nicht-„0"-Wert als angehakt – „x", „ja" oder „1" funktionieren also alle
+gleichermaßen. **Zeitgeschichtliche Bedeutung** wird auf 1 bis 10 begrenzt und
+ergibt ohne Angabe den Vorgabewert 5. Das **Alias** wird wie beim manuellen
+Anlegen automatisch aus den Namen gebildet.
+
+**Existiert bereits eine Person mit demselben Vor- und Nachnamen**, wird die
+Zeile übersprungen statt einen Doppelgänger anzulegen – das gilt auch für
+mehrfache Vorkommen desselben Namens innerhalb einer Datei. Zeilen ohne
+Nachname sowie Zeilen, die aus anderen Gründen nicht gespeichert werden
+konnten (etwa weil ein Wert zu lang für sein Datenbankfeld ist), werden
+ebenfalls übersprungen. Am Ende steht für jede hochgeladene Datei eine
+Meldung mit der Anzahl importierter Personen und, falls vorhanden, den Namen
+der übersprungenen bzw. fehlgeschlagenen Zeilen.
+
 ### CSV-Export
 
 Die Schaltfläche **CSV-Export** über der Liste lädt alle Personen als
