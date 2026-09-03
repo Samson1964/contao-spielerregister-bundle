@@ -1,5 +1,21 @@
 # DSB-Spielerregister Changelog
 
+## Version 3.1.2 (2026-08-24)
+
+Nachprüfung ohne funktionale Änderung.
+
+* Change: Mit echtem **PHP 8.4.24** gegen Contao 4.13.58 und 5.7.7 geprüft
+  (Syntax, 28 Unit-Tests, alle Frontend-Module, drei Insert-Tags,
+  DCA-Rückruffunktionen, CSV-Import inklusive Formular, CSV-Export, beide
+  Cronjobs, Datenbankabgleich). Kein einziger Hinweis aus dem Bundle selbst;
+  `composer.json` verlangte mit `php: ^7.4 || ^8.0` bereits 8.4, das war also
+  nur zu bestätigen, nicht zu ändern.
+* Change: Alle 66 Textdateien des Repos auf gültiges UTF-8 und auf ein BOM
+  geprüft (Vorgabe: UTF-8 ohne BOM). Keine Datei betroffen — die zuvor in
+  Windows-1252 gespeicherte `TODO.md` (unversioniert, siehe „TODO.md nicht
+  versionieren") war bereits beim Verschieben des vorigen Punktes behoben
+  worden.
+
 ## Version 3.1.1 (2026-08-24)
 
 * Fix: Das Formular des CSV-Imports war unformatiert – Trennzeichen und

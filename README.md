@@ -26,7 +26,7 @@ Inhaltselement, drei Insert-Tags und zwei Cronjobs für den Newsletterversand.
 | | |
 |---|---|
 | Contao | 4.13 LTS oder 5.x (geprüft mit 4.13.58 und 5.7.7) |
-| PHP | 7.4 oder 8.x (geprüft mit 8.3) |
+| PHP | 7.4 oder 8.x (geprüft mit 8.3 und 8.4) |
 | Weitere Erweiterungen | `contao/newsletter-bundle`, `menatwork/contao-multicolumnwizard-bundle`, `schachbulle/contao-helper-bundle` |
 
 Die Abhängigkeiten installiert Composer automatisch mit.
