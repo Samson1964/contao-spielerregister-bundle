@@ -29,6 +29,102 @@ use Symfony\Component\Routing\Exception\ExceptionInterface as RoutingException;
 class Helper
 {
 	/**
+	 * Soziale Netzwerke mit dem Muster ihrer Profiladresse.
+	 *
+	 * Im Register steht nur der Benutzername (Spalten social_youtube,
+	 * social_x, social_facebook, social_instagram); die vollständige Adresse
+	 * entsteht erst bei der Ausgabe. Ändert ein Netzwerk seine Adressform, muss
+	 * damit nur diese Liste angepasst werden, nicht jeder Datensatz.
+	 *
+	 * @var array<string, string> Netzwerk => sprintf-Muster mit %s für den Namen
+	 */
+	public const SOZIALE_NETZE = array
+	(
+		'youtube'   => 'https://www.youtube.com/@%s',
+		'x'         => 'https://x.com/%s',
+		'facebook'  => 'https://www.facebook.com/%s',
+		'instagram' => 'https://www.instagram.com/%s/',
+	);
+
+	/**
+	 * Reduziert eine Eingabe auf den reinen Benutzernamen eines sozialen Netzwerks.
+	 *
+	 * save_callback der Felder social_* und Umwandlung beim CSV-Import. Wer statt
+	 * des Namens die komplette Profiladresse einfügt (oder "@name"), bekommt
+	 * trotzdem nur den Namen gespeichert:
+	 *
+	 *     https://www.instagram.com/magnus/   -> magnus
+	 *     x.com/foo?lang=de                   -> foo
+	 *     @MagnusCarlsen                      -> MagnusCarlsen
+	 *     youtube.com/user/alt                -> alt
+	 *
+	 * Übrig bleiben nur Buchstaben, Ziffern, Punkt, Unterstrich und Bindestrich
+	 * — damit kann der Name gefahrlos in eine Adresse und in HTML eingesetzt
+	 * werden. YouTube-Kanal-IDs (youtube.com/channel/UC…) sind keine
+	 * Benutzernamen und ergeben keine gültige @-Adresse.
+	 *
+	 * @param mixed $varValue Eingabe aus dem Formular oder der CSV-Datei
+	 *
+	 * @return string Der bereinigte Benutzername, oder ein leerer String
+	 */
+	public static function bereinigeBenutzername($varValue): string
+	{
+		$strWert = trim(html_entity_decode((string) $varValue, ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+
+		if ('' === $strWert)
+		{
+			return '';
+		}
+
+		// Abfrageteil und Sprungmarke gehören nie zum Namen
+		$strWert = preg_split('/[?#]/', $strWert)[0];
+
+		if (false !== strpos($strWert, '/'))
+		{
+			$strWert = preg_replace('~^(?:https?:)?//~i', '', $strWert);
+			$arrTeile = array_values(array_filter(explode('/', $strWert), 'strlen'));
+
+			// Der erste Teil ist der Rechnername, sofern er einen Punkt enthält
+			if (isset($arrTeile[0]) && false !== strpos($arrTeile[0], '.'))
+			{
+				array_shift($arrTeile);
+			}
+
+			// Alte YouTube-Adressen: youtube.com/user/name und youtube.com/c/name
+			if (isset($arrTeile[1]) && \in_array(strtolower($arrTeile[0]), array('user', 'c'), true))
+			{
+				array_shift($arrTeile);
+			}
+
+			$strWert = $arrTeile[0] ?? '';
+		}
+
+		return (string) preg_replace('/[^A-Za-z0-9._-]/', '', ltrim($strWert, '@'));
+	}
+
+	/**
+	 * Baut aus einem Benutzernamen die Profiladresse eines sozialen Netzwerks.
+	 *
+	 * @param string $strNetz Schlüssel aus self::SOZIALE_NETZE (youtube, x,
+	 *                        facebook, instagram)
+	 * @param mixed  $varName Benutzername wie im Register gespeichert
+	 *
+	 * @return string Die vollständige Adresse, oder ein leerer String bei leerem
+	 *                Namen oder unbekanntem Netzwerk
+	 */
+	public static function sozialerLink(string $strNetz, $varName): string
+	{
+		$strName = self::bereinigeBenutzername($varName);
+
+		if ('' === $strName || !isset(self::SOZIALE_NETZE[$strNetz]))
+		{
+			return '';
+		}
+
+		return sprintf(self::SOZIALE_NETZE[$strNetz], rawurlencode($strName));
+	}
+
+	/**
 	 * Liefert alle Personen des Registers als Auswahlliste.
 	 *
 	 * Wird als options_callback für das Inhaltselement "Person aus dem
@@ -163,6 +259,8 @@ class Helper
 	 * - "zahl": als Ganzzahl, eine leere Zelle ergibt 0
 	 * - "bedeutung": als Ganzzahl zwischen 1 und 10; eine leere oder
 	 *   ungültige Zelle ergibt den Vorgabewert 5, wie das Auswahlfeld im Backend
+	 * - "benutzername": über bereinigeBenutzername() auf den reinen Namen
+	 *   eines sozialen Netzwerks gekürzt
 	 *
 	 * @param string $strTyp  Einer der oben genannten Typnamen
 	 * @param string $strWert Die Zelle aus der CSV-Datei, roh
@@ -188,6 +286,9 @@ class Helper
 				$intWert = '' === $strWert ? 5 : (int) $strWert;
 
 				return max(1, min(10, $intWert));
+
+			case 'benutzername':
+				return self::bereinigeBenutzername($strWert);
 
 			default:
 				return $strWert;

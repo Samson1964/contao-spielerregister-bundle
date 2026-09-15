@@ -125,6 +125,36 @@ class HelperTest extends TestCase
 		$this->assertSame(0, Helper::wandleImportwert('zahl', 'keine Zahl'));
 	}
 
+	public function testBereinigeBenutzername(): void
+	{
+		$this->assertSame('magnus', Helper::bereinigeBenutzername('https://www.instagram.com/magnus/'));
+		$this->assertSame('foo', Helper::bereinigeBenutzername('x.com/foo?lang=de'));
+		$this->assertSame('MagnusCarlsen', Helper::bereinigeBenutzername('@MagnusCarlsen'));
+		$this->assertSame('alt', Helper::bereinigeBenutzername('https://youtube.com/user/alt'));
+		$this->assertSame('handle', Helper::bereinigeBenutzername('https://www.youtube.com/@handle'));
+		$this->assertSame('schach.bund_de-1', Helper::bereinigeBenutzername('  schach.bund_de-1  '));
+		$this->assertSame('', Helper::bereinigeBenutzername(''));
+		$this->assertSame('', Helper::bereinigeBenutzername(null));
+
+		// Alles außer Buchstaben, Ziffern, Punkt, Unterstrich und Bindestrich fällt weg
+		$this->assertSame('evilscript', Helper::bereinigeBenutzername('evil"<script>'));
+	}
+
+	public function testSozialerLink(): void
+	{
+		$this->assertSame('https://www.youtube.com/@handle', Helper::sozialerLink('youtube', 'handle'));
+		$this->assertSame('https://x.com/foo', Helper::sozialerLink('x', '@foo'));
+		$this->assertSame('https://www.facebook.com/schachbund', Helper::sozialerLink('facebook', 'https://www.facebook.com/schachbund'));
+		$this->assertSame('https://www.instagram.com/magnus/', Helper::sozialerLink('instagram', 'magnus'));
+		$this->assertSame('', Helper::sozialerLink('x', ''));
+		$this->assertSame('', Helper::sozialerLink('myspace', 'foo'));
+	}
+
+	public function testWandleImportwertBenutzername(): void
+	{
+		$this->assertSame('foo', Helper::wandleImportwert('benutzername', 'https://x.com/foo'));
+	}
+
 	public function testWandleImportwertBedeutung(): void
 	{
 		$this->assertSame(7, Helper::wandleImportwert('bedeutung', '7'));

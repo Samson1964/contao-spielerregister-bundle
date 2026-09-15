@@ -22,3 +22,4 @@ $GLOBALS['TL_LANG']['FMD']['spielerregister_yearday'] = array('Aktueller Jahrest
 $GLOBALS['TL_LANG']['FMD']['spielerregister_honorlist'] = array('Ehrungslisten', 'Ehrungslisten anzeigen');
 $GLOBALS['TL_LANG']['FMD']['spielerregister_deathlist'] = array('Sterbeliste', 'Sterbeliste anzeigen');
 $GLOBALS['TL_LANG']['FMD']['spielerregister_titlelist'] = array('FIDE-Titelliste', 'FIDE-Titelliste anzeigen');
+$GLOBALS['TL_LANG']['FMD']['spielerregister_visitenkarte'] = array('Visitenkarte', 'Eine Person in einer frei gestalteten Visitenkarte anzeigen');

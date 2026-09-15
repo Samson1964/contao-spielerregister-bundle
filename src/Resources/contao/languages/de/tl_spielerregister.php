@@ -28,6 +28,7 @@ $GLOBALS['TL_LANG']['tl_spielerregister']['hideLifedata'] = array('Lebensdaten a
 
 $GLOBALS['TL_LANG']['tl_spielerregister']['photos_legend'] = 'Fotos';
 $GLOBALS['TL_LANG']['tl_spielerregister']['multiSRC'] = array('Quelldateien', 'Bitte wählen Sie eine oder mehr Dateien oder Ordner aus der Dateiübersicht. Wenn Sie einen Ordner auswählen, werden die darin enthaltenen Dateien automatisch eingefügt.');
+$GLOBALS['TL_LANG']['tl_spielerregister']['cardSRC'] = array('Referenzbild für Visitenkarten', 'Dieses Foto erscheint im Frontend-Modul "Visitenkarte" (Platzhalter ##bild##). Ohne Auswahl wird das jüngste Foto der Person verwendet.');
 
 $GLOBALS['TL_LANG']['tl_spielerregister']['info_legend'] = 'Personenbeschreibung';
 $GLOBALS['TL_LANG']['tl_spielerregister']['shortinfo'] = array('Kurzbeschreibung', 'Die Kurzbeschreibung wird in der Gesamtübersicht angezeigt.');
@@ -41,7 +42,11 @@ $GLOBALS['TL_LANG']['tl_spielerregister']['longinfo'] = array('Langbeschreibung'
 $GLOBALS['TL_LANG']['tl_spielerregister']['link_legend'] = 'Links';
 $GLOBALS['TL_LANG']['tl_spielerregister']['wikipedia'] = array('Wikipedia-Name', 'Name in der deutschen Wikipedia');
 $GLOBALS['TL_LANG']['tl_spielerregister']['fide_id'] = array('FIDE-ID', 'ID bei der FIDE');
-$GLOBALS['TL_LANG']['tl_spielerregister']['dewis_id'] = array('DeWIS-ID', 'ID in DeWIS');
+$GLOBALS['TL_LANG']['tl_spielerregister']['nuliga_id'] = array('nuLiga-Personen-ID', 'Personen-ID aus nuLiga in der Form NU1234567. Wird z. B. für die Insert-Tags {{dwz::…}} und {{elo::…}} des Wertungsportals gebraucht.');
+$GLOBALS['TL_LANG']['tl_spielerregister']['social_youtube'] = array('YouTube', 'Nur der Benutzername (ohne @). Eine eingefügte Profiladresse wird beim Speichern auf den Namen gekürzt.');
+$GLOBALS['TL_LANG']['tl_spielerregister']['social_x'] = array('X', 'Nur der Benutzername (ohne @). Eine eingefügte Profiladresse wird beim Speichern auf den Namen gekürzt.');
+$GLOBALS['TL_LANG']['tl_spielerregister']['social_facebook'] = array('Facebook', 'Nur der Benutzername. Eine eingefügte Profiladresse wird beim Speichern auf den Namen gekürzt.');
+$GLOBALS['TL_LANG']['tl_spielerregister']['social_instagram'] = array('Instagram', 'Nur der Benutzername (ohne @). Eine eingefügte Profiladresse wird beim Speichern auf den Namen gekürzt.');
 $GLOBALS['TL_LANG']['tl_spielerregister']['chessgames_id'] = array('ID chessgames.com', 'ID in chessgames.com');
 $GLOBALS['TL_LANG']['tl_spielerregister']['365chess_id'] = array('ID 365chess.com', 'ID in 365chess.com');
 $GLOBALS['TL_LANG']['tl_spielerregister']['chess_id'] = array('ID chess.com', 'ID in chess.com');
@@ -87,6 +92,7 @@ $GLOBALS['TL_LANG']['tl_spielerregister']['active'] = array('Aktiv', 'Person akt
 
 $GLOBALS['TL_LANG']['tl_spielerregister']['import'] = array('CSV-Import', 'Daten aus einer CSV-Datei importieren');
 $GLOBALS['TL_LANG']['tl_spielerregister']['export'] = array('CSV-Export', 'Daten als CSV-Datei exportieren');
+$GLOBALS['TL_LANG']['tl_spielerregister']['cards'] = array('Visitenkarten', 'Vorlagen für das Frontend-Modul "Visitenkarte" bearbeiten');
 $GLOBALS['TL_LANG']['tl_spielerregister']['new'] = array('Neuer Spieler', 'Neuen Spieler anlegen');
 $GLOBALS['TL_LANG']['tl_spielerregister']['edit'] = array('Spieler bearbeiten', 'Spieler %s bearbeiten');
 $GLOBALS['TL_LANG']['tl_spielerregister']['editImage'] = array('Spielerfotos bearbeiten', 'Fotos vom Spieler %s bearbeiten');

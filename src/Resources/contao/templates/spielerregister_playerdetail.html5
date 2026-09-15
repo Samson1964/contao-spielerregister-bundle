@@ -88,7 +88,15 @@
 		<?php endif; ?>
 	</ul>
 	<?php endif; ?>
-	
+
+	<?php if (!empty($this->sozial)): ?>
+	<ul class="sozial">
+		<?php foreach ($this->sozial as $netz => $url): ?>
+		<li class="sozial_<?= $netz ?>"><a href="<?= $url ?>" target="_blank" rel="noopener"><?= ['youtube' => 'YouTube', 'x' => 'X', 'facebook' => 'Facebook', 'instagram' => 'Instagram'][$netz] ?? $netz ?></a></li>
+		<?php endforeach; ?>
+	</ul>
+	<?php endif; ?>
+
 	<?= $this->debug ?>
 
 <?php $this->endblock(); ?>

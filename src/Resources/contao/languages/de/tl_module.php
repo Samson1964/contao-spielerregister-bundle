@@ -20,3 +20,5 @@ $GLOBALS['TL_LANG']['tl_module']['spielerregister_jumpTo'] = array('Weiterleitun
 $GLOBALS['TL_LANG']['tl_module']['spielerregister_honorListtype'] = array('Liste auswählen', 'Bitte wählen Sie die Liste der Ehrungen aus.');
 $GLOBALS['TL_LANG']['tl_module']['spielerregister_deathlist_months'] = array('Anzahl Monate', 'Bitte wählen Sie die maximale Anzahl der Monate für die Anzeige.');
 $GLOBALS['TL_LANG']['tl_module']['spielerregister_titlelist'] = array('Listenart', 'Liste mit FIDE-Titel auswählen');
+$GLOBALS['TL_LANG']['tl_module']['spielerregister_person'] = array('Person', 'Die Person aus dem Spielerregister, die auf der Visitenkarte erscheint. Deaktivierte Personen werden nicht ausgegeben.');
+$GLOBALS['TL_LANG']['tl_module']['spielerregister_karte'] = array('Visitenkarte', 'Die Vorlage, angelegt unter Inhalte → Spielerregister → Visitenkarten.');

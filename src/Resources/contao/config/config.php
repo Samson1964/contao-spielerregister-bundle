@@ -19,6 +19,7 @@ use Schachbulle\ContaoSpielerregisterBundle\Module\Export;
 use Schachbulle\ContaoSpielerregisterBundle\Module\HonorList;
 use Schachbulle\ContaoSpielerregisterBundle\Module\PlayerDetail;
 use Schachbulle\ContaoSpielerregisterBundle\Module\TitleList;
+use Schachbulle\ContaoSpielerregisterBundle\Module\Visitenkarte;
 use Schachbulle\ContaoSpielerregisterBundle\Module\Yearday;
 use Schachbulle\ContaoSpielerregisterBundle\Module\YeardayList;
 
@@ -36,18 +37,22 @@ $GLOBALS['FE_MOD']['spielerregister'] = array
 	'spielerregister_honorlist'    => HonorList::class,
 	'spielerregister_deathlist'    => DeathList::class,
 	'spielerregister_titlelist'    => TitleList::class,
+	'spielerregister_visitenkarte' => Visitenkarte::class,
 );
 
 /*
  * Backend-Modul des Spielerregisters in das Backend-Menü "Inhalte" an Position 1
  * einfügen. ArrayUtil::arrayInsert() ersetzt die in Contao 5 entfallene globale
  * Funktion array_insert().
+ *
+ * tl_spielerregister_cards (Visitenkarten) hängt an keiner Elterntabelle; sie
+ * muss trotzdem hier stehen, sonst lässt Contao den Aufruf über table= nicht zu.
  */
 ArrayUtil::arrayInsert($GLOBALS['BE_MOD']['content'], 1, array
 (
 	'spielerregister' => array
 	(
-		'tables'         => array('tl_spielerregister', 'tl_spielerregister_images'),
+		'tables'         => array('tl_spielerregister', 'tl_spielerregister_images', 'tl_spielerregister_cards'),
 		'icon'           => 'bundles/contaospielerregister/images/icon.png',
 		'import'         => array(Import::class, 'importSpieler'),
 		'export'         => array(Export::class, 'exportSpieler')

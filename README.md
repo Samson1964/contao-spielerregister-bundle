@@ -13,6 +13,7 @@ Inhaltselement, drei Insert-Tags und zwei Cronjobs für den Newsletterversand.
 - [Einstellungen](#einstellungen)
 - [Personen im Backend pflegen](#personen-im-backend-pflegen)
 - [Frontend-Module](#frontend-module)
+- [Visitenkarten](#visitenkarten)
 - [Inhaltselement](#inhaltselement)
 - [Insert-Tags](#insert-tags)
 - [Templates und Dateien](#templates-und-dateien)
@@ -91,9 +92,9 @@ Nachname, Vorname, Geburts- und Sterbetag auf.
 | **Name** | Nachname, Vorname, Titel (z. B. „Dr."), Alias |
 | **Alternative Namen** | Bis zu drei weitere Nach- und Vornamen, etwa Geburtsnamen oder abweichende Schreibweisen. Die Suche im Frontend berücksichtigt alle vier Nachnamen. |
 | **Lebensdaten** | Geburtstag, Geburtsort, abweichender Geburtstag, Kennzeichen „verstorben" (blendet Todestag, Todesort und abweichenden Todestag ein), „Lebensdaten ausblenden" |
-| **Fotos** | Dateiauswahl aus der Dateiverwaltung (mehrere Dateien oder ein Ordner) |
+| **Fotos** | Dateiauswahl aus der Dateiverwaltung (mehrere Dateien oder ein Ordner), Referenzbild für Visitenkarten |
 | **Informationen** | Kurzinfo, Weblinks zum Beitrag, Langinfo |
-| **Weblinks** | Wikipedia-Stichwort, FIDE-ID, DeWIS-ID, chessgames.com, 365chess.com, chess.com, Homepage |
+| **Weblinks** | Wikipedia-Stichwort, FIDE-ID, nuLiga-Personen-ID, chessgames.com, 365chess.com, chess.com, Homepage, YouTube, X, Facebook, Instagram |
 | **Bedeutung** | Zeitgeschichtliche Bedeutung von 1 (gering) bis 10 (hoch) |
 | **FIDE-Titel** | GM, IM, WGM, WIM mit jeweiligem Verleihungsdatum |
 | **Ehrungen des DSB** | Ehrenpräsident, Ehrenmitglied, Goldene/Silberne Ehrennadel, Goldene/Silberne Ehrenplakette, Ehrenbrief, Ehrenteller, Bundesmedaille – jeweils mit Jahreszahl |
@@ -182,7 +183,8 @@ abbilden; sie werden nach dem Import manuell im Backend ergänzt.
 `firstname2`, `surname3`, `firstname3`, `surname4`, `firstname4`, `birthday`,
 `birthday_alt`, `birthplace`, `deathday`, `deathday_alt`, `deathplace`,
 `death`, `hideLifedata`, `shortinfo`, `longinfo`, `wikipedia`, `fide_id`,
-`dewis_id`, `chessgames_id`, `chess365_id`, `chess_id`, `homepage`,
+`nuliga_id`, `chessgames_id`, `chess365_id`, `chess_id`, `homepage`,
+`social_youtube`, `social_x`, `social_facebook`, `social_instagram`,
 `importance`, `gm_title`, `gm_date`, `im_title`, `im_date`, `wgm_title`,
 `wgm_date`, `wim_title`, `wim_date`, `honorpresident`, `honormember`,
 `honorgoldpin`, `honorsilverpin`, `honorgoldbadge`, `honorsilverbadge`,
@@ -284,6 +286,136 @@ Verleihung – die jüngsten Titelträger stehen oben.
   Großmeisterinnen, Internationale Meisterinnen
 * **Template:** `spielerregister_titlelist`
 
+### Visitenkarte (`spielerregister_visitenkarte`)
+
+Gibt eine Person in einer frei gestalteten Vorlage aus, siehe
+[Visitenkarten](#visitenkarten).
+
+* **Einstellungen:** Person, Visitenkarte (Vorlage)
+* **Besonderheit:** Ist die Person deaktiviert oder die Vorlage gelöscht, gibt
+  das Modul nichts aus. Die Überschrift des Moduls kann genutzt werden.
+* **Template:** `spielerregister_visitenkarte` (Rahmen `div.visitenkarte`, der
+  Inhalt stammt aus der Vorlage)
+
+## Visitenkarten
+
+Mit Visitenkarten lässt sich eine Person frei gestaltet ausgeben, etwa als
+Spielerbox auf einer Kaderseite. Das Zusammenspiel:
+
+1. **Vorlage anlegen** unter **Inhalte → Spielerregister → Visitenkarten**
+   (Schaltfläche über der Personenliste). Es können beliebig viele Vorlagen
+   angelegt werden.
+2. **Frontend-Modul „Visitenkarte"** anlegen und darin Person und Vorlage
+   wählen. Für mehrere Spieler wird je Spieler ein Modul angelegt.
+3. Optional am Datensatz der Person ein **Referenzbild für Visitenkarten**
+   wählen. Ohne Referenzbild wird das jüngste Foto aus der Dateiauswahl
+   verwendet, sonst das jüngste aktive Foto der Fototabelle.
+
+### Einstellungen einer Vorlage
+
+| Feld | Bedeutung |
+|---|---|
+| **Bezeichnung** | Name, unter dem die Vorlage im Modul ausgewählt wird |
+| **HTML-Vorlage** | Das HTML mit Platzhaltern, Abfragen und Insert-Tags (siehe unten) |
+| **Bildgröße** | Größe des Fotos, das `##bild##` einsetzt |
+| **Bildausrichtung** | oben, links, rechts, unten — ergibt die CSS-Klasse `float_above`, `float_left` usw. |
+| **Großansicht** | Foto beim Anklicken in der Lightbox vergrößern |
+| **Hintergrundbild** | Wird als `background-image` an den Rahmen `div.visitenkarte` gesetzt |
+| **CSS-Klasse** | Zusätzliche Klasse für diesen Rahmen, etwa `spielerbox` |
+
+Größe, Wiederholung und Position des Hintergrundbildes regelt das Stylesheet des
+Seitenlayouts, zum Beispiel:
+
+```css
+.visitenkarte.spielerbox { background-size: cover; background-position: center; }
+```
+
+### Platzhalter
+
+Jede Spalte des Registers steht unter ihrem Spaltennamen zur Verfügung, etwa
+`##surname1##`, `##birthplace##`, `##nuliga_id##`, `##fide_id##`,
+`##importance##` oder `##shortinfo##` — die Spaltennamen stehen im Abschnitt
+[CSV-Import](#csv-import). Ausgenommen sind nur `multiSRC`, `links` und
+`cardSRC`, die als Text nicht verwertbar sind. Dazu kommen abgeleitete Werte:
+
+| Platzhalter | Inhalt |
+|---|---|
+| `##name##` | Vorname und Nachname |
+| `##name_umgekehrt##` | „Nachname, Vorname" |
+| `##geburtstag_text##`, `##todestag_text##` | Datum wie `19.01.1997`, `01.1941` oder `1941` |
+| `##lebensdaten##` | Geburts- und Sterbedaten samt Orten in einer Zeile |
+| `##alter##` | Alter in Jahren, bei Verstorbenen das Alter beim Tod; leer bei unvollständigem Datum |
+| `##fide_titel##` | Höchster FIDE-Titel aus dem Register: GM, IM, WGM oder WIM |
+| `##fide_url##` | Profil bei ratings.fide.com (leer ohne FIDE-ID) |
+| `##wikipedia_url##` | Artikel in der deutschen Wikipedia (leer ohne Stichwort) |
+| `##youtube_url##`, `##x_url##`, `##facebook_url##`, `##instagram_url##` | Profiladressen, aus dem gespeicherten Benutzernamen gebildet |
+| `##bild##` | Das fertige `<figure>` des Fotos in der gewählten Größe und Ausrichtung |
+| `##bild_url##` | Nur die Adresse des erzeugten Fotos |
+| `##detail_link##` | Adresse der Detailseite (siehe [Einstellungen](#einstellungen)) |
+
+Ist bei der Person **„Lebensdaten ausblenden"** gesetzt, bleiben alle Platzhalter
+mit Geburts- und Sterbedaten leer — auch die rohen Spalten wie `##birthday##` —,
+damit eine Vorlage die Einstellung nicht unterläuft.
+
+### Abfragen
+
+Die Vorlage wird mit dem Simple-Token-Parser des Contao-Kerns ausgewertet, der
+auch in Formularen und Benachrichtigungen verwendet wird:
+
+```text
+{if nuliga_id}DWZ: {{dwz::##nuliga_id##}}{endif}
+{if death}† ##todestag_text##{else}Alter: ##alter##{endif}
+{if importance >= 8}<strong>##name##</strong>{else}##name##{endif}
+{if fide_titel == "GM"}Großmeister{elseif fide_titel == "IM"}Internationaler Meister{endif}
+```
+
+In der Abfrage steht der Platzhalter **ohne** Rauten. Ein Platzhalter gilt als
+wahr, wenn er nicht leer und nicht „0" ist. Eine fehlerhafte Abfrage — etwa ein
+`{if}` ohne `{endif}` — wird schon beim Speichern der Vorlage gemeldet.
+
+### Insert-Tags
+
+Insert-Tags werden **nach** den Platzhaltern ersetzt. Dadurch lassen sich
+Platzhalter in Insert-Tags einsetzen, auch in solche anderer Erweiterungen. Mit
+dem Wertungsportal-Bundle zum Beispiel:
+
+| Insert-Tag | Ausgabe |
+|---|---|
+| `{{dwz::##nuliga_id##}}` | aktuelle DWZ |
+| `{{elo::##nuliga_id##}}` | Elo, verlinkt auf das FIDE-Profil |
+| `{{ftitel::##nuliga_id##}}` | FIDE-Titel aus der Elo-Liste |
+| `{{verein::##nuliga_id##}}` | Vereinsname |
+
+Insert-Tags, die in den Werten des Registers selbst stehen (etwa ein
+`{{file::…}}` in der Kurzinfo), werden aus Sicherheitsgründen **nicht**
+ausgeführt — mit Ausnahme von `shortinfo` und `longinfo`, die wie auf der
+Detailseite vorab aufgelöst werden.
+
+### Beispiel
+
+Eine Spielerbox wie auf der Kaderseite von schachbund.de:
+
+```html
+<div class="spielerfoto">##bild##</div>
+<div class="spielertext">
+  <h3>##name##</h3>
+  <p>
+    {if fide_titel}Titel: <strong>##fide_titel##</strong><br>{endif}
+    {if nuliga_id}DWZ: <strong>{{dwz::##nuliga_id##}}</strong><br>
+    Elo: <strong>{{elo::##nuliga_id##}}</strong><br>
+    Verein: <strong>{{verein::##nuliga_id##}}</strong><br>{endif}
+    {if alter}Alter: <strong>##alter##</strong><br>{endif}
+    {if wikipedia_url}<a href="##wikipedia_url##" target="_blank" rel="noopener">Wikipedia</a><br>{endif}
+    {if homepage}<a href="##homepage##" target="_blank" rel="noopener">Homepage</a>{endif}
+  </p>
+</div>
+```
+
+Mit Bildausrichtung „oben", CSS-Klasse `spielerbox` und passender Bildgröße
+ergibt das dieselbe Struktur wie die bisherige, von Hand gepflegte Box. Angaben,
+die nicht im Register stehen — etwa die Zahl der Länderspiele —, lassen sich
+nur über Insert-Tags anderer Erweiterungen oder als fester Text einbinden.
+
 ## Inhaltselement
 
 Das Inhaltselement **Person aus dem Spielerregister** (Gruppe „Include-Elemente")
@@ -352,6 +484,7 @@ Verzeichnis `templates/` der Contao-Installation kopiert werden.
 | `spielerregister_honorlist` | Modul „Ehrungslisten" |
 | `spielerregister_deathlist` | Modul „Sterbeliste" |
 | `spielerregister_titlelist` | Modul „FIDE-Titelliste" |
+| `spielerregister_visitenkarte` | Modul „Visitenkarte" (nur der Rahmen; der Inhalt kommt aus der Vorlage) |
 | `ce_spielerregister_person` | Inhaltselement „Person aus dem Spielerregister" |
 | `spielerregister_infobox` | Lightbox des Insert-Tags `{{register::…}}` |
 | `spielerregister_modalbox` | Dialogbox des Insert-Tags `{{spielerregister_box::…}}` |

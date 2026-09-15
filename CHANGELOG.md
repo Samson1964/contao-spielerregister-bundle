@@ -1,5 +1,33 @@
 # DSB-Spielerregister Changelog
 
+## Version 3.2.0 (2026-09-15)
+
+* Add: **Visitenkarten.** Neue Schaltfläche „Visitenkarten" über der
+  Personenliste führt zu beliebig vielen Vorlagen (Tabelle
+  `tl_spielerregister_cards`). Eine Vorlage ist HTML mit Platzhaltern
+  (`##name##`, `##alter##`, jede Spalte des Registers …) und Abfragen
+  (`{if nuliga_id}…{else}…{endif}`), ausgewertet mit dem Simple-Token-Parser
+  des Contao-Kerns. Danach werden Insert-Tags ersetzt, auch fremde wie
+  `{{dwz::##nuliga_id##}}` aus dem Wertungsportal-Bundle. Je Vorlage
+  einstellbar: Bildgröße, Bildausrichtung, Großansicht, Hintergrundbild und
+  CSS-Klasse. Eine fehlerhafte Abfrage wird schon beim Speichern gemeldet.
+* Add: Frontend-Modul **„Visitenkarte"**: Person und Vorlage auswählen.
+* Add: Feld **„Referenzbild für Visitenkarten"** (`cardSRC`, kein Pflichtfeld).
+  Ohne Referenzbild nimmt die Visitenkarte das jüngste Foto aus der
+  Dateiauswahl, sonst aus der Fototabelle.
+* Add: Felder für **YouTube, X, Facebook und Instagram** (`social_youtube`,
+  `social_x`, `social_facebook`, `social_instagram`). Gespeichert wird nur der
+  Benutzername; eine eingefügte Profiladresse oder ein führendes „@" wird beim
+  Speichern und beim CSV-Import entfernt. Die Adresse entsteht erst bei der
+  Ausgabe (`Helper::sozialerLink()`), auch auf der Detailseite.
+* Change: **DeWIS-ID durch „nuLiga-Personen-ID" (`nuliga_id`) ersetzt.** Die
+  Spalte `dewis_id` war im Datenbestand von schachbund.de bei allen 3061
+  Personen leer; die Datenbankaktualisierung schlägt ihr Löschen vor. Der
+  CSV-Import erkennt statt `dewis_id` jetzt `nuliga_id` und die vier
+  Social-Media-Spalten.
+* Change: Alias-Erzeugung und CSV-Wertumwandlung liegen in `Klassen/Helper.php`;
+  dazu 13 neue Unit-Tests (jetzt 41).
+
 ## Version 3.1.2 (2026-08-24)
 
 Nachprüfung ohne funktionale Änderung.

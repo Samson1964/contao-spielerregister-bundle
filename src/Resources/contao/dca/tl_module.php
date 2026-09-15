@@ -18,10 +18,53 @@ $GLOBALS['TL_DCA']['tl_module']['palettes']['spielerregister_playerdetail'] = '{
 $GLOBALS['TL_DCA']['tl_module']['palettes']['spielerregister_honorlist'] = '{title_legend},name,headline,type;{options_legend},spielerregister_honorListtype;{expert_legend:hide},cssID,align,space';
 $GLOBALS['TL_DCA']['tl_module']['palettes']['spielerregister_deathlist'] = '{title_legend},name,headline,type;{options_legend},spielerregister_deathlist_months;{expert_legend:hide},cssID,align,space';
 $GLOBALS['TL_DCA']['tl_module']['palettes']['spielerregister_titlelist'] = '{title_legend},name,headline,type;{options_legend},spielerregister_titlelist;{expert_legend:hide},cssID,align,space';
+$GLOBALS['TL_DCA']['tl_module']['palettes']['spielerregister_visitenkarte'] = '{title_legend},name,headline,type;{options_legend},spielerregister_person,spielerregister_karte;{template_legend:hide},customTpl;{expert_legend:hide},cssID';
 
 /*
  * Felder
  */
+
+// Person für das Modul "Visitenkarte"
+$GLOBALS['TL_DCA']['tl_module']['fields']['spielerregister_person'] = array
+(
+	'label'            => &$GLOBALS['TL_LANG']['tl_module']['spielerregister_person'],
+	'exclude'          => true,
+	'inputType'        => 'select',
+	// Als Closure statt array(Klasse, Methode): siehe Kommentar bei spielerregister_karte
+	'options_callback' => static function ()
+	{
+		return \Schachbulle\ContaoSpielerregisterBundle\Klassen\Helper::getRegister();
+	},
+	'eval'             => array('mandatory'=>true, 'chosen'=>true, 'includeBlankOption'=>true, 'tl_class'=>'w50'),
+	'sql'              => "int(10) unsigned NOT NULL default '0'"
+);
+
+// Vorlage für das Modul "Visitenkarte"
+$GLOBALS['TL_DCA']['tl_module']['fields']['spielerregister_karte'] = array
+(
+	'label'            => &$GLOBALS['TL_LANG']['tl_module']['spielerregister_karte'],
+	'exclude'          => true,
+	'inputType'        => 'select',
+	// Eine Closure wird direkt aufgerufen; ein array(Klasse, Methode) ginge über
+	// System::importStatic() und damit über "new Klasse()"
+	'options_callback' => static function ()
+	{
+		$arrOptionen = array();
+
+		$objKarten = \Contao\Database::getInstance()
+			->prepare('SELECT id, title FROM tl_spielerregister_cards ORDER BY title')
+			->execute();
+
+		while ($objKarten->next())
+		{
+			$arrOptionen[(int) $objKarten->id] = $objKarten->title;
+		}
+
+		return $arrOptionen;
+	},
+	'eval'             => array('mandatory'=>true, 'includeBlankOption'=>true, 'tl_class'=>'w50'),
+	'sql'              => "int(10) unsigned NOT NULL default '0'"
+);
 
 $GLOBALS['TL_DCA']['tl_module']['fields']['spielerregister_level'] = array
 (

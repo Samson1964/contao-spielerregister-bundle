@@ -1,0 +1,9 @@
+<?php $this->extend('block_searchable'); ?>
+
+<?php $this->block('content'); ?>
+
+  <div class="visitenkarte<?= $this->kartenklasse ?>"<?php if ($this->hintergrund): ?> style="background-image:url('<?= $this->hintergrund ?>')"<?php endif; ?>>
+    <?= $this->inhalt ?>
+  </div>
+
+<?php $this->endblock(); ?>

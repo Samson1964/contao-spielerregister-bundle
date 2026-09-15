@@ -221,6 +221,22 @@ class PlayerDetail extends SpielerregisterModul
 		$this->Template->chess_id = $objRegister->chess_id;
 		$this->Template->chessgames_id = $objRegister->chessgames_id;
 
+		// Profile in sozialen Netzwerken: Im Register steht nur der
+		// Benutzername, die Adresse entsteht hier. Leere Einträge fallen weg.
+		$arrSozial = array();
+
+		foreach (array_keys(Helper::SOZIALE_NETZE) as $strNetz)
+		{
+			$strUrl = Helper::sozialerLink($strNetz, $objRegister->{'social_'.$strNetz});
+
+			if ('' !== $strUrl)
+			{
+				$arrSozial[$strNetz] = $strUrl;
+			}
+		}
+
+		$this->Template->sozial = $arrSozial;
+
 		// Bilder aus multiSRC holen
 		$images = Spielerregister::Bilder($objRegister->multiSRC);
 

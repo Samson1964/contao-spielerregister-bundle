@@ -90,7 +90,7 @@ $GLOBALS['TL_DCA']['tl_spielerregister'] = array
 	'palettes' => array
 	(
 		'__selector__'                => array('death'),
-		'default'                     => 'infobox;{namen_legend},surname1,firstname1,title,alias;{namen2_legend:hide},surname2,firstname2,surname3,firstname3,surname4,firstname4;{live_legend},birthday,birthplace,birthday_alt,death,hideLifedata;{photos_legend:hide},multiSRC;{info_legend:hide},shortinfo,links,longinfo;{link_legend:hide},wikipedia,fide_id,dewis_id,chessgames_id,chess365_id,chess_id,homepage;{star_legend},importance;{fide_legend},gm_title,gm_date,im_title,im_date,wgm_title,wgm_date,wim_title,wim_date;{dsb_legend},honorpresident,honormember,honorgoldpin,honorsilverpin,honorgoldbadge,honorsilverbadge,honorletter,honorplate,honormedal;{intern_legend:hide},intern;{active_legend},nohighlighting,active'
+		'default'                     => 'infobox;{namen_legend},surname1,firstname1,title,alias;{namen2_legend:hide},surname2,firstname2,surname3,firstname3,surname4,firstname4;{live_legend},birthday,birthplace,birthday_alt,death,hideLifedata;{photos_legend:hide},multiSRC,cardSRC;{info_legend:hide},shortinfo,links,longinfo;{link_legend:hide},wikipedia,fide_id,nuliga_id,chessgames_id,chess365_id,chess_id,homepage,social_youtube,social_x,social_facebook,social_instagram;{star_legend},importance;{fide_legend},gm_title,gm_date,im_title,im_date,wgm_title,wgm_date,wim_title,wim_date;{dsb_legend},honorpresident,honormember,honorgoldpin,honorsilverpin,honorgoldbadge,honorsilverbadge,honorletter,honorplate,honormedal;{intern_legend:hide},intern;{active_legend},nohighlighting,active'
 	),
 
 	// Subpalettes
@@ -361,6 +361,23 @@ $GLOBALS['TL_DCA']['tl_spielerregister'] = array
 			),
 			'sql'                     => "blob NULL"
 		),
+		// Foto für das Frontend-Modul "Visitenkarte". Ohne Auswahl nimmt die
+		// Visitenkarte das jüngste Foto aus multiSRC bzw. der Fototabelle.
+		'cardSRC' => array
+		(
+			'label'                   => &$GLOBALS['TL_LANG']['tl_spielerregister']['cardSRC'],
+			'exclude'                 => true,
+			'inputType'               => 'fileTree',
+			'eval'                    => array
+			(
+				'fieldType'           => 'radio',
+				'filesOnly'           => true,
+				'extensions'          => implode(',', (array) System::getContainer()->getParameter('contao.image.valid_extensions')),
+				'mandatory'           => false,
+				'tl_class'            => 'clr'
+			),
+			'sql'                     => "binary(16) NULL"
+		),
 		'shortinfo' => array
 		(
 			'label'                   => &$GLOBALS['TL_LANG']['tl_spielerregister']['shortinfo'],
@@ -461,14 +478,16 @@ $GLOBALS['TL_DCA']['tl_spielerregister'] = array
 			'eval'                    => array('maxlength'=>10, 'tl_class'=>'w50'),
 			'sql'                     => "int(10) unsigned NOT NULL default '0'"
 		),
-		'dewis_id' => array
+		// Personen-ID aus nuLiga (Form "NU…"), ersetzt die DeWIS-ID. Das
+		// Wertungsportal-Bundle erwartet sie in {{dwz::…}}, {{elo::…}} usw.
+		'nuliga_id' => array
 		(
-			'label'                   => &$GLOBALS['TL_LANG']['tl_spielerregister']['dewis_id'],
+			'label'                   => &$GLOBALS['TL_LANG']['tl_spielerregister']['nuliga_id'],
 			'exclude'                 => true,
-			'search'                  => false,
+			'search'                  => true,
 			'inputType'               => 'text',
-			'eval'                    => array('maxlength'=>10, 'tl_class'=>'w50'),
-			'sql'                     => "int(10) unsigned NOT NULL default '0'"
+			'eval'                    => array('maxlength'=>32, 'nospace'=>true, 'tl_class'=>'w50'),
+			'sql'                     => "varchar(32) NOT NULL default ''"
 		),
 		'chessgames_id' => array
 		(
@@ -506,6 +525,60 @@ $GLOBALS['TL_DCA']['tl_spielerregister'] = array
 			'inputType'               => 'text',
 			'eval'                    => array('mandatory'=>false, 'rgxp'=>'url', 'decodeEntities'=>true, 'maxlength'=>255, 'tl_class'=>'long clr'),
 			'sql'                     => "varchar(255) NOT NULL default ''"
+		),
+		// Soziale Netzwerke: gespeichert wird nur der Benutzername, die Adresse
+		// baut Helper::sozialerLink() erst bei der Ausgabe zusammen
+		'social_youtube' => array
+		(
+			'label'                   => &$GLOBALS['TL_LANG']['tl_spielerregister']['social_youtube'],
+			'exclude'                 => true,
+			'search'                  => true,
+			'inputType'               => 'text',
+			'eval'                    => array('maxlength'=>64, 'nospace'=>true, 'tl_class'=>'w50 clr'),
+			'save_callback'           => array
+			(
+				array(Helper::class, 'bereinigeBenutzername')
+			),
+			'sql'                     => "varchar(64) NOT NULL default ''"
+		),
+		'social_x' => array
+		(
+			'label'                   => &$GLOBALS['TL_LANG']['tl_spielerregister']['social_x'],
+			'exclude'                 => true,
+			'search'                  => true,
+			'inputType'               => 'text',
+			'eval'                    => array('maxlength'=>64, 'nospace'=>true, 'tl_class'=>'w50'),
+			'save_callback'           => array
+			(
+				array(Helper::class, 'bereinigeBenutzername')
+			),
+			'sql'                     => "varchar(64) NOT NULL default ''"
+		),
+		'social_facebook' => array
+		(
+			'label'                   => &$GLOBALS['TL_LANG']['tl_spielerregister']['social_facebook'],
+			'exclude'                 => true,
+			'search'                  => true,
+			'inputType'               => 'text',
+			'eval'                    => array('maxlength'=>64, 'nospace'=>true, 'tl_class'=>'w50 clr'),
+			'save_callback'           => array
+			(
+				array(Helper::class, 'bereinigeBenutzername')
+			),
+			'sql'                     => "varchar(64) NOT NULL default ''"
+		),
+		'social_instagram' => array
+		(
+			'label'                   => &$GLOBALS['TL_LANG']['tl_spielerregister']['social_instagram'],
+			'exclude'                 => true,
+			'search'                  => true,
+			'inputType'               => 'text',
+			'eval'                    => array('maxlength'=>64, 'nospace'=>true, 'tl_class'=>'w50'),
+			'save_callback'           => array
+			(
+				array(Helper::class, 'bereinigeBenutzername')
+			),
+			'sql'                     => "varchar(64) NOT NULL default ''"
 		),
 		'importance' => array
 		(
@@ -797,6 +870,11 @@ if (ContaoSpielerregisterBundle::isContao5())
 {
 	$GLOBALS['TL_DCA']['tl_spielerregister']['list']['global_operations'] = array
 	(
+		'cards' => array
+		(
+			'href'                => 'table=tl_spielerregister_cards',
+			'icon'                => 'person.svg'
+		),
 		'import' => array
 		(
 			'href'                => 'key=import',
@@ -829,6 +907,13 @@ else
 {
 	$GLOBALS['TL_DCA']['tl_spielerregister']['list']['global_operations'] = array
 	(
+		'cards' => array
+		(
+			'label'               => &$GLOBALS['TL_LANG']['tl_spielerregister']['cards'],
+			'href'                => 'table=tl_spielerregister_cards',
+			'icon'                => 'person.svg',
+			'attributes'          => 'onclick="Backend.getScrollOffset()"'
+		),
 		'import' => array
 		(
 			'label'               => &$GLOBALS['TL_LANG']['tl_spielerregister']['import'],
