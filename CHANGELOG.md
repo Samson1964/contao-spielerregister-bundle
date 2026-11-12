@@ -1,5 +1,13 @@
 # DSB-Spielerregister Changelog
 
+## Version 3.3.1 (2026-11-12)
+
+* Fix: Veröffentlicht die Änderungen von 3.3.0 erneut. Der Tag 3.3.0 war
+  versehentlich auf den Stand von 3.2.0 gesetzt worden; Packagist liefert unter
+  3.3.0 deshalb dauerhaft den Code von 3.2.0 aus (ein Umsetzen des Tags lässt
+  Packagist nicht zu). Inhaltlich identisch mit dem Eintrag zu 3.3.0 unten —
+  bitte 3.3.1 oder neuer verwenden.
+
 ## Version 3.3.0 (2026-11-12)
 
 * Add: **Hilfe zur HTML-Vorlage der Visitenkarten.** Das Fragezeichen am Feld
