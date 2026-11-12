@@ -1,5 +1,21 @@
 # DSB-Spielerregister Changelog
 
+## Version 3.3.0 (2026-11-12)
+
+* Add: **Hilfe zur HTML-Vorlage der Visitenkarten.** Das Fragezeichen am Feld
+  „HTML-Vorlage" öffnet den Contao-Hilfeassistenten mit allen Platzhaltern
+  (zusammengesetzte und Felder des Registers), Abfragen mit Vergleichen und
+  Verknüpfungen, Insert-Tags samt Wertungsportal-Beispielen, Hinweisen zu Bild
+  und Hintergrund sowie einer Beispielvorlage (`languages/de/explain.php`).
+* Change: **Sterbeliste/Gedenktafel zeigt auf Wunsch alle Verstorbenen.**
+  „Anzahl Monate" = 0 hebt die Zeitgrenze auf; Personen ohne bekanntes
+  Sterbedatum stehen dann am Ende mit „unbekannt". Neu in den Einstellungen
+  ist „Elemente pro Seite" (Kernfeld `perPage`) für eine Seitennavigation;
+  gezählt und geblättert wird in der Datenbank. Unter Contao 5.7 über den
+  Dienst `contao.pagination.factory`, unter 4.13 über `Contao\Pagination`.
+  Eine Seitenzahl außerhalb der Liste ergibt die 404-Seite.
+* Change: „Anzahl Monate" nimmt nur noch Zahlen an (vorher `alnum`).
+
 ## Version 3.2.0 (2026-09-15)
 
 * Add: **Visitenkarten.** Neue Schaltfläche „Visitenkarten" über der

@@ -90,9 +90,11 @@ $GLOBALS['TL_DCA']['tl_spielerregister_cards'] = array
 			'exclude'                 => true,
 			'search'                  => true,
 			'inputType'               => 'textarea',
+			// Hilfe hinter dem Fragezeichen: languages/de/explain.php
+			'explanation'             => 'spielerregister_visitenkarte',
 			// Wie beim HTML-Inhaltselement des Kerns; preserveTags lässt
 			// Insert-Tags und {if}-Abfragen unangetastet
-			'eval'                    => array('mandatory'=>true, 'allowHtml'=>true, 'preserveTags'=>true, 'class'=>'monospace', 'rte'=>'ace|html', 'tl_class'=>'clr'),
+			'eval'                    => array('mandatory'=>true, 'allowHtml'=>true, 'preserveTags'=>true, 'class'=>'monospace', 'rte'=>'ace|html', 'helpwizard'=>true, 'tl_class'=>'clr'),
 			'save_callback'           => array
 			(
 				array(Visitenkarte::class, 'pruefeVorlage')

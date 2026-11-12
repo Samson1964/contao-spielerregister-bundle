@@ -271,11 +271,19 @@ nach dem Jahr der Verleihung.
 
 ### Sterbeliste (`spielerregister_deathlist`)
 
-Listet die zuletzt verstorbenen Personen auf, die jüngsten zuerst, mit
-Sterbedatum, Sterbealter und Kurzinfo.
+Listet die verstorbenen Personen auf, die jüngsten zuerst, mit Sterbedatum,
+Sterbealter und Kurzinfo. Auf schachbund.de ist das die Gedenktafel.
 
-* **Einstellung:** Anzahl Monate, die zurückgeschaut wird
-* **Template:** `spielerregister_deathlist`
+* **Einstellungen:**
+  * **Anzahl Monate** — nur Personen, die in diesen letzten Monaten verstorben
+    sind. **0 zeigt alle Verstorbenen**, auch solche ohne bekanntes
+    Sterbedatum (sie stehen am Ende, Sterbedatum „unbekannt").
+  * **Elemente pro Seite** — verteilt die Liste auf mehrere Seiten mit
+    Seitennavigation, z. B. 50. 0 zeigt alles auf einer Seite. Der Parameter
+    in der Adresse heißt `page_d<Modul-ID>`; eine Seitenzahl außerhalb der
+    Liste ergibt die 404-Seite.
+* **Template:** `spielerregister_deathlist` (Variable `pagination` für die
+  Seitennavigation)
 
 ### FIDE-Titelliste (`spielerregister_titlelist`)
 
@@ -316,7 +324,7 @@ Spielerbox auf einer Kaderseite. Das Zusammenspiel:
 | Feld | Bedeutung |
 |---|---|
 | **Bezeichnung** | Name, unter dem die Vorlage im Modul ausgewählt wird |
-| **HTML-Vorlage** | Das HTML mit Platzhaltern, Abfragen und Insert-Tags (siehe unten) |
+| **HTML-Vorlage** | Das HTML mit Platzhaltern, Abfragen und Insert-Tags (siehe unten). Das Fragezeichen am Feld öffnet eine Hilfe mit allen Platzhaltern, Abfragen, Insert-Tags und einem Beispiel |
 | **Bildgröße** | Größe des Fotos, das `##bild##` einsetzt |
 | **Bildausrichtung** | oben, links, rechts, unten — ergibt die CSS-Klasse `float_above`, `float_left` usw. |
 | **Großansicht** | Foto beim Anklicken in der Lightbox vergrößern |

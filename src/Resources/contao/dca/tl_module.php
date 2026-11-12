@@ -16,7 +16,7 @@ $GLOBALS['TL_DCA']['tl_module']['palettes']['spielerregister_yeardaylist'] = '{t
 $GLOBALS['TL_DCA']['tl_module']['palettes']['spielerregister_yearday'] = '{title_legend},name,type;{options_legend},spielerregister_jumpTo,spielerregister_level;{expert_legend:hide},cssID,align,space';
 $GLOBALS['TL_DCA']['tl_module']['palettes']['spielerregister_playerdetail'] = '{title_legend},name,type;{options_legend},spielerregister_jumpTo;{expert_legend:hide},cssID,align,space';
 $GLOBALS['TL_DCA']['tl_module']['palettes']['spielerregister_honorlist'] = '{title_legend},name,headline,type;{options_legend},spielerregister_honorListtype;{expert_legend:hide},cssID,align,space';
-$GLOBALS['TL_DCA']['tl_module']['palettes']['spielerregister_deathlist'] = '{title_legend},name,headline,type;{options_legend},spielerregister_deathlist_months;{expert_legend:hide},cssID,align,space';
+$GLOBALS['TL_DCA']['tl_module']['palettes']['spielerregister_deathlist'] = '{title_legend},name,headline,type;{options_legend},spielerregister_deathlist_months,perPage;{expert_legend:hide},cssID,align,space';
 $GLOBALS['TL_DCA']['tl_module']['palettes']['spielerregister_titlelist'] = '{title_legend},name,headline,type;{options_legend},spielerregister_titlelist;{expert_legend:hide},cssID,align,space';
 $GLOBALS['TL_DCA']['tl_module']['palettes']['spielerregister_visitenkarte'] = '{title_legend},name,headline,type;{options_legend},spielerregister_person,spielerregister_karte;{template_legend:hide},customTpl;{expert_legend:hide},cssID';
 
@@ -133,7 +133,8 @@ $GLOBALS['TL_DCA']['tl_module']['fields']['spielerregister_deathlist_months'] = 
 	(
 		'maxlength'           => 2,
 		'tl_class'            => 'w50',
-		'rgxp'                => 'alnum'
+		// 0 bedeutet "alle Verstorbenen"; die Spalte ist ohnehin eine Zahl
+		'rgxp'                => 'natural'
 	),
 	'sql'                     => "int(2) unsigned NOT NULL default '12'"
 );
