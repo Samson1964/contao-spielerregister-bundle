@@ -1,5 +1,20 @@
 # DSB-Spielerregister Changelog
 
+## Version 3.4.0 (2026-11-25)
+
+* Add: Reiter **„Spielerregister" im Link-Auswahlfenster** des Backends
+  (`Picker/SpielerregisterPickerProvider`). Eine Person auswählen setzt
+  `{{spielerregister_url::ID}}` ein; ein bereits eingetragener Tag öffnet das
+  Fenster direkt bei dieser Person. Nur für Benutzer mit Zugriff auf das Modul.
+* Add: Insert-Tag **`{{spielerregister_link::ID}}`** bzw.
+  `{{spielerregister_link::ID::Linktext}}` — fertiger Link mit dem Namen zur
+  Detailseite. Deaktivierte oder unbekannte Personen ergeben nur den Text.
+* Change: Gedenktafel/Sterbeliste zeigt die **Seitennavigation auch über** der
+  Tabelle.
+* Change: Detailseite hebt die **Langbeschreibung** hervor: getönter Kasten mit
+  kurzer zentrierter Linie darüber (`css/playerdetail.css`, über
+  CSS-Variablen anpassbar). Der Kasten weicht dem Foto-Slider aus.
+
 ## Version 3.3.1 (2026-11-12)
 
 * Fix: Veröffentlicht die Änderungen von 3.3.0 erneut. Der Tag 3.3.0 war

@@ -217,6 +217,13 @@ class PlayerDetail extends SpielerregisterModul
 		// gibt es nicht, deshalb blieb der ausführliche Text auf der Detailseite
 		// immer leer.
 		$this->Template->langinfo = $objRegister->longinfo;
+
+		// Hervorhebung der Langbeschreibung (getönter Kasten mit Linie darüber);
+		// nur einbinden, wenn es überhaupt eine Langbeschreibung gibt
+		if ($objRegister->longinfo)
+		{
+			$GLOBALS['TL_CSS'][] = 'bundles/contaospielerregister/css/playerdetail.css|static';
+		}
 		$this->Template->chess365_id = $objRegister->chess365_id;
 		$this->Template->chess_id = $objRegister->chess_id;
 		$this->Template->chessgames_id = $objRegister->chessgames_id;

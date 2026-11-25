@@ -4,7 +4,8 @@ Erweiterung für **Contao 4.13 und Contao 5**, die eine Personendatenbank für d
 Schachsport bereitstellt: Lebensdaten, Fotos, FIDE-Titel, Ehrungen des Deutschen
 Schachbundes und Weblinks. Im Frontend stehen Detailseite, Jahrestagslisten,
 Ehrungslisten, Sterbeliste und Titellisten zur Verfügung, dazu ein
-Inhaltselement, drei Insert-Tags und zwei Cronjobs für den Newsletterversand.
+Inhaltselement, vier Insert-Tags samt Reiter im Link-Auswahlfenster und zwei
+Cronjobs für den Newsletterversand.
 
 ## Inhalt
 
@@ -236,6 +237,19 @@ Modul ein Suchformular.
   muss mindestens zwei Zeichen lang sein.
 * **Angezeigt werden** nur aktive Personen.
 * **Seitentitel:** Der Name der Person wird dem Seitentitel vorangestellt.
+* **Langbeschreibung:** steht in einem leicht getönten Kasten `div.langinfo`
+  mit einer kurzen, zentrierten Linie darüber. Das Stylesheet
+  `bundles/contaospielerregister/css/playerdetail.css` wird nur eingebunden,
+  wenn die Person eine Langbeschreibung hat. Farben und Linienbreite lassen sich
+  im Stylesheet des Layouts über CSS-Variablen anpassen:
+
+  ```css
+  .langinfo {
+      --spielerregister-langinfo-bg: #eef3f8;         /* Hintergrund */
+      --spielerregister-langinfo-linie: #6b8bb0;      /* Linie */
+      --spielerregister-langinfo-linienbreite: 6em;   /* Länge der Linie */
+  }
+  ```
 * **Template:** `spielerregister_playerdetail`
 
 ### Jahrestagliste (`spielerregister_yeardaylist`)
@@ -279,7 +293,7 @@ Sterbealter und Kurzinfo. Auf schachbund.de ist das die Gedenktafel.
     sind. **0 zeigt alle Verstorbenen**, auch solche ohne bekanntes
     Sterbedatum (sie stehen am Ende, Sterbedatum „unbekannt").
   * **Elemente pro Seite** — verteilt die Liste auf mehrere Seiten mit
-    Seitennavigation, z. B. 50. 0 zeigt alles auf einer Seite. Der Parameter
+    Seitennavigation über und unter der Tabelle, z. B. 50. 0 zeigt alles auf einer Seite. Der Parameter
     in der Adresse heißt `page_d<Modul-ID>`; eine Seitenzahl außerhalb der
     Liste ergibt die 404-Seite.
 * **Template:** `spielerregister_deathlist` (Variable `pagination` für die
@@ -446,6 +460,23 @@ die Daten im Artikel doppelt gepflegt werden müssen.
 Gibt die Adresse der Detailansicht für die Person mit der ID 815 zurück,
 gebildet aus der in den Einstellungen gewählten Detailseite. Ohne eingestellte
 Detailseite bleibt die Ausgabe leer.
+
+**Auswahl im Backend:** Im Link-Auswahlfenster (Linkfelder, Link-Dialog des
+Editors) gibt es den Reiter **„Spielerregister"** neben Seiten, Artikeln und
+Nachrichten. Dort eine Person wählen — eingesetzt wird
+`{{spielerregister_url::ID}}`. Der Reiter erscheint nur für Benutzer, die das
+Backend-Modul Spielerregister benutzen dürfen.
+
+### `{{spielerregister_link::ID}}`
+
+    {{spielerregister_link::815}}
+    {{spielerregister_link::815::der zweite Weltmeister}}
+
+Gibt einen fertigen Link zur Detailseite aus:
+`<a href="…" class="spielerregister_link" title="Emanuel Lasker">Emanuel Lasker</a>`.
+Hinter dem zweiten `::` steht wahlweise ein eigener Linktext. Ist die Person
+deaktiviert, unbekannt oder keine Detailseite eingestellt, wird nur der Text
+ausgegeben — es entsteht kein toter Link.
 
 ### `{{spielerregister_box::ID}}`
 

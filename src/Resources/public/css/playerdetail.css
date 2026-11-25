@@ -1,0 +1,39 @@
+/*
+ * Detailseite des Spielerregisters: Langbeschreibung hervorheben.
+ *
+ * Die Langbeschreibung steht in einem leicht getönten Kasten, über dem eine
+ * kurze, zentrierte Linie sitzt. Farben, Linienbreite und Abstände stehen als
+ * CSS-Variablen bereit und lassen sich im Stylesheet des Layouts überschreiben,
+ * etwa: .langinfo { --spielerregister-langinfo-bg: #eef3f8; }
+ */
+.langinfo {
+	--spielerregister-langinfo-bg: #f4f1ea;
+	--spielerregister-langinfo-linie: #a39b8b;
+	--spielerregister-langinfo-linienbreite: 4em;
+
+	/* flow-root: Der Kasten weicht dem links umflossenen Foto-Slider aus,
+	   statt seinen Hintergrund darunter durchzuziehen */
+	display: flow-root;
+	margin: 1.5em 0;
+	padding: 1.25em 1.5em;
+	background: var(--spielerregister-langinfo-bg);
+	border-radius: 4px;
+}
+
+.langinfo::before {
+	content: "";
+	display: block;
+	width: var(--spielerregister-langinfo-linienbreite);
+	max-width: 50%;
+	height: 2px;
+	margin: 0 auto 1.25em;
+	background: var(--spielerregister-langinfo-linie);
+}
+
+.langinfo > :first-child {
+	margin-top: 0;
+}
+
+.langinfo > :last-child {
+	margin-bottom: 0;
+}

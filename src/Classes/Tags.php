@@ -14,14 +14,16 @@ namespace Schachbulle\ContaoSpielerregisterBundle\Classes;
 use Contao\Database;
 use Contao\Frontend;
 use Contao\FrontendTemplate;
+use Contao\StringUtil;
 use Schachbulle\ContaoSpielerregisterBundle\Klassen\Helper;
 
 /**
  * Insert-Tags des Spielerregisters.
  *
- * Bereitgestellt werden {{spielerregister_url::ID}} für den reinen Link zur
- * Detailseite und {{spielerregister_box::ID::Text}} für einen Textlink, der
- * eine Modalbox mit den Lebensdaten der Person öffnet.
+ * Bereitgestellt werden {{spielerregister_url::ID}} für die reine Adresse der
+ * Detailseite, {{spielerregister_link::ID::Text}} für einen fertigen Link
+ * dorthin und {{spielerregister_box::ID::Text}} für einen Textlink, der eine
+ * Modalbox mit den Lebensdaten der Person öffnet.
  */
 class Tags extends Frontend
 {
@@ -52,6 +54,18 @@ class Tags extends Frontend
 			}
 
 			return self::getLink($arrSplit[1]);
+		}
+
+		// Inserttag {{spielerregister_link::ID}} bzw. {{spielerregister_link::ID::Linktext}}
+		// Liefert einen fertigen Link mit dem Namen zur Detailseite der Person
+		if ($arrSplit[0] == 'spielerregister_link' || $arrSplit[0] == 'cache_spielerregister_link')
+		{
+			if (!isset($arrSplit[1]))
+			{
+				return 'ID fehlt!';
+			}
+
+			return self::erzeugeLink($arrSplit[1], $arrSplit[2] ?? '');
 		}
 
 		// Inserttag {{spielerregister_box::ID::Linktext}}
@@ -106,6 +120,47 @@ class Tags extends Frontend
 	public static function getLink($id): string
 	{
 		return Helper::getPlayerlink($id);
+	}
+
+	/**
+	 * Erzeugt einen Textlink auf die Detailseite einer Person.
+	 *
+	 * Ergebnis ist <a href="…" class="spielerregister_link">Vorname Nachname</a>,
+	 * mit eigenem Linktext statt des Namens, falls einer angegeben ist. Verlinkt
+	 * wird nur, was die Detailseite auch anzeigt: aktive Personen mit einer
+	 * Bedeutung von mindestens 1. Fehlt die Person, ist sie deaktiviert oder
+	 * ist keine Detailseite eingestellt, bleibt nur der Text stehen — so bricht
+	 * kein Satz ab und es entsteht kein toter Link.
+	 *
+	 * @param int|string $id      ID des Datensatzes der Person
+	 * @param string     $strText Eigener Linktext; leer bedeutet den Namen der Person
+	 *
+	 * @return string Der Link, nur der Text, oder ein leerer String, wenn es
+	 *                weder Person noch eigenen Text gibt
+	 */
+	public static function erzeugeLink($id, string $strText = ''): string
+	{
+		$objPerson = Database::getInstance()
+			->prepare('SELECT id, firstname1, surname1, active, importance FROM tl_spielerregister WHERE id = ?')
+			->limit(1)
+			->execute((int) $id);
+
+		$strName = $objPerson->numRows ? trim($objPerson->firstname1.' '.$objPerson->surname1) : '';
+		$strAnzeige = '' !== $strText ? $strText : StringUtil::specialchars($strName);
+
+		if (!$objPerson->numRows || !$objPerson->active || (int) $objPerson->importance < 1)
+		{
+			return $strAnzeige;
+		}
+
+		$strUrl = self::getLink($objPerson->id);
+
+		if ('' === $strUrl)
+		{
+			return $strAnzeige;
+		}
+
+		return sprintf('<a href="%s" class="spielerregister_link" title="%s">%s</a>', StringUtil::specialchars($strUrl), StringUtil::specialchars($strName), $strAnzeige);
 	}
 
 	/**

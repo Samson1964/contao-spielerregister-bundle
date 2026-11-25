@@ -27,3 +27,16 @@ services:
             - '@?monolog.logger.contao.cron'
         tags:
             - { name: contao.cronjob, interval: daily }
+
+    # Reiter "Spielerregister" im Link-Auswahlfenster des Backends; setzt
+    # {{spielerregister_url::ID}} ein. Priorität wie beim Nachrichten-Picker,
+    # damit der Reiter hinter Seiten und Artikeln einsortiert wird.
+    schachbulle.spielerregister.picker:
+        class: Schachbulle\ContaoSpielerregisterBundle\Picker\SpielerregisterPickerProvider
+        arguments:
+            - '@knp_menu.factory'
+            - '@router'
+            - '@translator'
+            - '@security.helper'
+        tags:
+            - { name: contao.picker_provider, priority: 120 }

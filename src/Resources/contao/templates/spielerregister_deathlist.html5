@@ -6,6 +6,8 @@
 		<<?php echo $this->hl; ?>><?php echo $this->headline; ?></<?php echo $this->hl; ?>>
 	<?php endif; ?>
 
+	<?php echo $this->pagination; ?>
+
 	<table>
 		<tr>
 			<th>Verstorben am</th>
